@@ -1,2 +1,2 @@
 django-widget-tweaks
-django_compressor
+django-compressor
