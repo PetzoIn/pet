@@ -6,19 +6,19 @@
 <body>
 
 {% if not allowed %}
-<form method="post" action="blog/check/">
+<form action="/blog/check/" method="POST">
 	{% csrf_token %}
 	<h2>{{ message }}</h2><br>
-	<input type="password" name="code">
-	<input type="submit" name="submitCode">
+	<input type="text" name="code">
+	<input type="Submit">
 </form>
 {% endif %}
 
 {% if allowed %}
 
-<h4>{{message}}</h4>
+<h4>{{ message }}</h4>
 
-<form method="POST" action="blog/add/">
+<form action="/blog/add/" method="POST">
 	{% csrf_token %}
 	<h3>Heading</h3><br>
 	<input type="text" name="Heading"><br>

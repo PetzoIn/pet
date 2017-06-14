@@ -10,4 +10,4 @@ class Post(models.Model):
 	image = models.ImageField(blank=True)
 
 	def __unicode__(self):
-		return self.id
+		return str(self.id)
