@@ -3,13 +3,19 @@ from django.http import HttpResponse, JsonResponse, Http404
 from django.views.decorators.csrf import csrf_exempt
 from models import Post
 
-d = {'allowed' : False, 'message': 'Enter the Code', 'posts': []}
+d = {'allowed' : True, 'message': 'Enter the Code', 'posts': []}
 
 def index(request):
+	posts = Post.objects.all()
+	d['posts']=[]
+	for p in posts:
+		d['posts'].append(p)
+
 	return render(request, 'petzoblog/base.html', d)
 
 @csrf_exempt
 def check(request):
+	print 'request**************'
 	if request.method == "POST":
 		print 'in check'
 		if request.POST.get('code') == '1234':
@@ -27,11 +33,12 @@ def check(request):
 @csrf_exempt
 def add(request):
 	if request.method == "POST":
+		print 'in add'
 		author = request.POST.get('Author')
 		content = request.POST.get('Content')
 		heading = request.POST.get('Heading')
 
-		p = Post.objects.create(author=author, content=content, heading=heading)
+		p = Post(author=author, content=content, heading=heading)
 		p.save()
 
 		d['posts'].append(p)
