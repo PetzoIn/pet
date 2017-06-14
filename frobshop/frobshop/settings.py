@@ -43,6 +43,9 @@ INSTALLED_APPS = [
     'django.contrib.flatpages',
     'compressor',
     'widget_tweaks',
+    'petzoapp',
+    'petzoblog',
+
 ] + get_core_apps()
 
 SITE_ID = 1
