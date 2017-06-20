@@ -171,3 +171,20 @@ COMPRESS_ROOT = ''
 
 OSCAR_DEFAULT_CURRENCY = u'INR'
 OSCAR_DEFAULT_FORMAT = u'\u20B9'
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'    
+
+MEDIA_ROOT = os.path.join(BASE_DIR,'media/images/products')
+
+#OSCAR_FROM_EMAIL = "siddharth.game@gmail.com"
+
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_HOST_USER = 'siddharth.game@gmail.com'
+EMAIL_HOST_PASSWORD = '1402J@ck8518'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+
+
+#from django.core.mail import send_mail
+#send_mail('Subject here', 'Here is the message.', 'siddharth.game@gmail.com', ['15ucs140@lnmiit.ac.in'], fail_silently=False)
+
