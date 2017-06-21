@@ -45,6 +45,11 @@ INSTALLED_APPS = [
     'widget_tweaks',
     'petzoapp',
     'petzoblog',
+    'allauth',
+    'allauth.account',
+    'allauth.socialaccount',
+    # 'allauth.socialaccount.providers.facebook',
+    # 'allauth.socialaccount.providers.google',
 
 ] + get_core_apps()
 
@@ -108,6 +113,7 @@ STATICFILES_FINDERS = (
 AUTHENTICATION_BACKENDS = (
     'oscar.apps.customer.auth_backends.EmailBackend',
     'django.contrib.auth.backends.ModelBackend',
+    'allauth.account.auth_backends.AuthenticationBackend',
 )
 
 WSGI_APPLICATION = 'frobshop.wsgi.application'

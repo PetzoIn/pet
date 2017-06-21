@@ -23,4 +23,5 @@ urlpatterns = [
 	url(r'', include(application.urls)),
     url(r'^app/', include('petzoapp.urls')),
     url(r'^blog/', include('petzoblog.urls')),
+    url(r'^auth/', include('allauth.urls')),
 ]
