@@ -177,6 +177,7 @@ COMPRESS_ROOT = ''
 
 OSCAR_DEFAULT_CURRENCY = u'INR'
 OSCAR_DEFAULT_FORMAT = u'\u20B9'
+OSCAR_SHOP_NAME = 'Petzo'
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'    
 
