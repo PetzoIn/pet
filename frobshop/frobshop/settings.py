@@ -48,8 +48,8 @@ INSTALLED_APPS = [
     'allauth',
     'allauth.account',
     'allauth.socialaccount',
-    # 'allauth.socialaccount.providers.facebook',
-    # 'allauth.socialaccount.providers.google',
+    'allauth.socialaccount.providers.facebook',
+    'allauth.socialaccount.providers.google',
 
 ] + get_core_apps()
 
@@ -188,3 +188,8 @@ EMAIL_HOST_USER = 'siddharth.game@gmail.com'
 EMAIL_HOST_PASSWORD = '1402J@ck8518'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
+
+SOCIALACCOUNT_PROVIDERS = {
+                            'facebook':{},
+                            'google':{}
+                        }
