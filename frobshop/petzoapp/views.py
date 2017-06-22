@@ -5,3 +5,4 @@ from models import *
 
 def index(request):
 	return HttpResponse('Main App')
+
