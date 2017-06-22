@@ -1,0 +1,48 @@
+<section ng-controller="strtctrl1">
+	<label class={{dogclickedaction}} ng-click = "dogclicked()">Dog</label>
+	<label class={{catclickedaction}} ng-click = "catclicked()">Cat</label>
+	<!---Dog Information--->
+	<aside ng-show = "showmedog">
+		<!---Dog Form Starts--->
+		<form class = "form-horizontal" novalidate>
+			<!---Name of the Dog--->
+			<div class="form-group">
+				<label for="dogname" class="col-sm-2 control-label">Dog's Name:</label>
+				<div class="col-sm-10">
+					<input type = "text" class="form-control" ng-model="dogname" id="dogname" placeholder="What's Their Name?" required/>
+				</div>
+			</div>
+		</form>
+		<div class = "buttonGroup">
+		<a ng-href = '#/'><button class="btn btn-primary">
+			<span class="glyphicon glyphicon-chevron-left"></span>
+			Back
+		</button></a>
+		<a ng-href = '#/dogbutton'><button class="btn btn-primary">
+			Next
+			<span class="glyphicon glyphicon-chevron-right"></span>
+		</button></a>
+	</aside>
+	<!---Cat Information--->
+	<aside ng-show="showmecat">
+		<!---Cat Form Starts--->
+		<form class = "form-horizontal" novalidate>
+			<!---Name of the Cat--->
+			<div class="form-group">
+				<label for="catname" class="col-sm-2 control-label">Cat's Name:</label>
+				<div class="col-sm-10">
+					<input type = "text" class="form-control" ng-model = "catname" id="catname" placeholder="What's Their Name?" required/>
+				</div>
+			</div>
+		</form>
+		<div class = "buttonGroup">
+		<a ng-href = '#/'><button class="btn btn-primary">
+			<span class="glyphicon glyphicon-chevron-left"></span>
+			Back
+		</button></a>
+		<a ng-href = '#/catbutton'><button class="btn btn-primary">
+			Next
+			<span class="glyphicon glyphicon-chevron-right"></span>
+		</button></a>
+	</aside>
+</section>

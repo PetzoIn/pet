@@ -1,0 +1,57 @@
+<section ng-controller="strtctrl2">
+	<label class={{breedclickedaction}} ng-click = "breedclicked()">Breed</label>
+	<label class={{crossbreedclickedaction}} ng-click = "crossbreedclicked()">CrossBreed</label>
+	<!---DogBreed Information--->
+	<aside ng-show = "showmebreed">
+		<!---DogBreed Form Starts--->
+		<form class = "form-horizontal" novalidate>
+			<!---Name of the DogBreed--->
+			<div class="form-group">
+				<label for="breedname" class="col-sm-2 control-label">Breed's Name:</label>
+				<div class="col-sm-10">
+					<input type = "text" class="form-control" id="breedname" placeholder="What's Their Breed?" required/>
+				</div>
+			</div>
+		</form>
+		<div class = "buttonGroup1">
+		<a ng-href = '#/petname'><button class="btn btn-primary">
+			<span class="glyphicon glyphicon-chevron-left"></span>
+			Back
+		</button></a>
+		<a ng-href = '#/birthdates'><button class="btn btn-primary">
+			Next
+			<span class="glyphicon glyphicon-chevron-right"></span>
+		</button></a>
+		</div>
+	</aside>
+	<!---Dog CrossBreed Information--->
+	<aside ng-show="showmecrossbreed">
+		<!---Dog Breed Form--->
+		<form class = "form-horizontal" novalidate>
+			<!---Name of the Breed 1 and 2--->
+			<div class="form-group">
+				<label for="crossbreedname1" class="col-sm-2 control-label">First Breed:</label>
+				<div class="col-sm-10">
+					<input type = "text" class="form-control" id="crossbreedname1" placeholder="Their First Breed Here..." required/>
+				</div>
+			</div>
+			<div class="form-group">
+				<label for="crossbreedname2" class="col-sm-2 control-label">Second Breed:</label>
+				<div class="col-sm-10">
+					<input type = "text" class="form-control" id="crossbreedname2" placeholder="Their Second Breed Here..." required/>
+				</div>
+			</div>
+		</form>
+		<div class = "buttonGroup1">
+		<a ng-href = '#/petname'><button class="btn btn-primary">
+			<span class="glyphicon glyphicon-chevron-left"></span>
+			Back
+		</button></a>
+		<a ng-href = '#/birthdates'><button class="btn btn-primary">
+			Next
+			<span class="glyphicon glyphicon-chevron-right"></span>
+		</button></a>
+		</div>
+	</aside>
+	
+</section>

@@ -1,0 +1,157 @@
+<!DOCTYPE HTML>
+<html lang="en">
+<head>
+<title>PETZO-Get Started</title>
+<!---angular Basic Import--->
+
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.3.15/angular.min.js"></script>
+
+<!---angular Animate Import--->
+
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.3.15/angular-animate.js"></script>
+
+<!---angular Routing Import--->
+
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.3.15/angular-route.js"></script>
+
+<!-- First include jquery js -->
+
+<script src="https://code.jquery.com/jquery-1.12.0.min.js"></script>
+
+<script src="https://code.jquery.com/jquery-migrate-1.2.1.min.js"></script>
+
+<!-- Latest compiled and minified JavaScript -->
+
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity=
+
+"sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+
+
+<!-- Latest compiled and minified CSS -->
+
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity=
+
+"sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+
+<!-- Optional theme -->
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity=
+
+"sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
+
+
+<script>
+
+var routingpage = angular.module("routingpage",["ngRoute","ngAnimate"]);
+
+routingpage.controller("strtctrl1",["$scope","$log",function($scope,$log){
+
+$log.log("Angular JS Initialized...")
+$scope.dogclickedaction = "btn btn-primary active";
+$scope.catclickedaction = "btn btn-primary";
+$scope.showmedog = true;
+
+$scope.dogclicked = function(){
+$scope.dogclickedaction = "btn btn-primary active";
+$scope.catclickedaction = "btn btn-primary";
+$scope.showmedog = true;
+$scope.showmecat = false;
+};
+
+
+$scope.catclicked = function(){
+$scope.catclickedaction = "btn btn-primary active";
+$scope.dogclickedaction = "btn btn-primary";
+$scope.showmecat = true;
+$scope.showmedog = false;
+};
+}]);
+
+routingpage.controller("strtctrl2",["$scope","$log",function($scope,$log){
+
+$log.log("Angular JS Initialized...")
+$scope.breedclickedaction = "btn btn-primary active";
+$scope.crossbreedclickedaction = "btn btn-primary";
+$scope.showmebreed = true;
+
+$scope.breedclicked = function(){
+$scope.breedclickedaction = "btn btn-primary active";
+$scope.crossbreedclickedaction = "btn btn-primary";
+$scope.showmebreed = true;
+$scope.showmecrossbreed = false;
+};
+
+
+$scope.crossbreedclicked = function(){
+$scope.crossbreedclickedaction = "btn btn-primary active";
+$scope.breedclickedaction = "btn btn-primary";
+$scope.showmecrossbreed = true;
+$scope.showmebreed = false;
+};
+}]);
+
+routingpage.controller("strtctrl3",["$scope","$log",function($scope,$log){
+
+$log.log("Angular JS Initialized...")
+$scope.breedclickedaction2 = "btn btn-primary active";
+$scope.crossbreedclickedaction2 = "btn btn-primary";
+$scope.otherclickedaction = "btn btn-primary";
+$scope.showmebreed2 = true;
+
+$scope.breedclicked2 = function(){
+$scope.breedclickedaction2 = "btn btn-primary active";
+$scope.crossbreedclickedaction2 = "btn btn-primary";
+$scope.otherclickedaction = "btn btn-primary";
+$scope.showmebreed2 = true;
+$scope.showmecrossbreed2 = false;
+$scope.showmeotherbreed = false;
+};
+
+
+$scope.crossbreedclicked2 = function(){
+$scope.crossbreedclickedaction2 = "btn btn-primary active";
+$scope.breedclickedaction2 = "btn btn-primary";
+$scope.otherclickedaction = "btn btn-primary";
+$scope.showmecrossbreed2 = true;
+$scope.showmebreed2 = false;
+$scope.showmeotherbreed = false;
+};
+
+$scope.otherclicked = function(){
+$scope.crossbreedclickedaction2 = "btn btn-primary";
+$scope.breedclickedaction2 = "btn btn-primary";
+$scope.otherclickedaction = "btn btn-primary active";
+$scope.showmecrossbreed2 = false;
+$scope.showmebreed2 = false;
+$scope.showmeotherbreed = true;
+};
+}]);
+
+routingpage.config(["$routeProvider","$locationProvider",function($routeProvider,$locationProvider){
+$routeProvider
+	.when('/', {
+        templateUrl : 'emailpage.html',
+	})
+	.when('/dogbutton', {
+        templateUrl : 'breeddog.html',
+		controller : 'strtctrl2'
+	})
+	.when('/catbutton', {
+        templateUrl : 'breedcat.html',
+		controller : 'strtctrl3'
+	})
+	.when('/petname',{
+		templateUrl : 'petname.html',
+		controller  : 'strtctrl1'
+	});
+}]);
+
+
+
+</script>
+</head>
+
+<body ng-app = "routingpage">
+<main ng-view></main>
+
+</body>
+</html>
