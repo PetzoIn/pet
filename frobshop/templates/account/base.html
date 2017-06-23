@@ -1,4 +1,6 @@
 <!DOCTYPE html>
+{% load socialaccount %}
+{% providers_media_js %}
 <html>
   <head>
     <title>{% block head_title %}{% endblock %}</title>
@@ -6,6 +8,24 @@
     {% endblock %}
   </head>
   <body>
+	<script>
+  window.fbAsyncInit = function() {
+    FB.init({
+      appId      : '782911551888399',
+      xfbml      : true,
+      version    : 'v2.9'
+    });
+    FB.AppEvents.logPageView();
+  };
+
+  (function(d, s, id){
+     var js, fjs = d.getElementsByTagName(s)[0];
+     if (d.getElementById(id)) {return;}
+     js = d.createElement(s); js.id = id;
+     js.src = "//connect.facebook.net/en_US/sdk.js";
+     fjs.parentNode.insertBefore(js, fjs);
+   }(document, 'script', 'facebook-jssdk'));
+	</script>
     {% block body %}
 
     {% if messages %}
@@ -36,5 +56,14 @@
     {% endblock %}
     {% block extra_body %}
     {% endblock %}
+
+<a href="{% provider_login_url "facebook" method="js_sdk" %}">Login Button image</a>
+
+	<div
+  class="fb-like"
+  data-share="true"
+  data-width="450"
+  data-show-faces="true">
+</div>
   </body>
 </html>

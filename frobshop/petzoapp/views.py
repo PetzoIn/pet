@@ -6,3 +6,8 @@ from models import *
 def index(request):
 	return HttpResponse('Main App')
 
+def email(request):
+	if request.Method == 'POST':
+		print request.POST.get('email')
+		
+

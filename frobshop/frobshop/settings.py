@@ -172,6 +172,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/1.10/howto/static-files/
 
 STATIC_URL = '/static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 
 COMPRESS_ROOT = ''
 
@@ -184,12 +185,38 @@ EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 MEDIA_ROOT = os.path.join(BASE_DIR,'media/images/products')
 
 EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_HOST_USER = 'xxxxxxxx'
-EMAIL_HOST_PASSWORD = 'xxxxxxxx'
+EMAIL_HOST_USER = 'siddharth.game@gmail.com'
+EMAIL_HOST_PASSWORD = '1402J@ck8518'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 
 SOCIALACCOUNT_PROVIDERS = {
-                            'facebook':{},
+                             
+                    'facebook': {'METHOD': 'oauth2',
+                             'SCOPE': ['email','public_profile'],
+                             'AUTH_PARAMS': {'auth_type': 'reauthenticate'},
+                             'FIELDS': [
+                                 'id',
+                                 'email',
+                                 'name',
+                                 'first_name',
+                                 'last_name',
+                                 'verified',
+                                 'locale',
+                                 'timezone',
+                                 'link',
+                                 'gender',
+                                 'updated_time'],
+                             'EXCHANGE_TOKEN': True,
+                             'LOCALE_FUNC': lambda request: 'kr_KR',
+                             'VERIFIED_EMAIL': False,
+                             'VERSION': 'v2.4'},
                             'google':{}
                         }
+                        
+SOCIAL_AUTH_FACEBOOK_KEY = '782911551888399'
+SOCIAL_AUTH_FACEBOOK_SECRET ='db7d7b4d0ae5fb4285dfbf06161684c0'
+LOGIN_REDIRECT_URL = "/"
+
+ACCOUNT_EMAIL_REQUIRED=True
+ACCOUNT_USERNAME_REQURIED=True
