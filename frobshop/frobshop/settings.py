@@ -190,8 +190,7 @@ EMAIL_HOST_PASSWORD = '1402J@ck8518'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 
-SOCIALACCOUNT_PROVIDERS = {
-                             
+SOCIALACCOUNT_PROVIDERS = {                             
                     'facebook': {'METHOD': 'oauth2',
                              'SCOPE': ['email','public_profile'],
                              'AUTH_PARAMS': {'auth_type': 'reauthenticate'},
@@ -211,8 +210,25 @@ SOCIALACCOUNT_PROVIDERS = {
                              'LOCALE_FUNC': lambda request: 'kr_KR',
                              'VERIFIED_EMAIL': False,
                              'VERSION': 'v2.4'},
-                            'google':{}
+                    'google': {
+                        'SCOPE': [
+                            'profile',
+                            'email'
+                        ],
+                        'AUTH_PARAMS': {
+                                'access_type': 'online',
+                            }
                         }
+}
+
+SOCIAL_AUTH_GOOGLE_OAUTH2_SCOPE = [
+    'https://www.googleapis.com/auth/userinfo.email',
+    'https://www.googleapis.com/auth/userinfo.profile',
+    'https://www.googleapis.com/auth/contacts.readonly',
+    'https://www.googleapis.com/auth/plus.me',
+    'https://www.googleapis.com/auth/userinfo.profile'
+
+]
                         
 SOCIAL_AUTH_FACEBOOK_KEY = '782911551888399'
 SOCIAL_AUTH_FACEBOOK_SECRET ='db7d7b4d0ae5fb4285dfbf06161684c0'
