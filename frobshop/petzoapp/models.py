@@ -9,6 +9,9 @@ class UserProfile(models.Model):
 	name = models.CharField(blank=True, max_length=128)
 	phone = models.CharField(blank=True, max_length=10)
 	address = models.TextField(blank=True)
+	referral = models.BooleanField(default=False)
+	no_of_referred_users = models.IntegerField(default=0)
+	user_credit = models.DecimalField(max_digits=8, decimal_places=3)
 
 	def __unicode__(self):
 		return self.name
@@ -24,7 +27,6 @@ class Dog(models.Model):
 	activity = models.CharField(blank=False, max_length=128)
 	image = models.ImageField(upload_to='media/cache', default='static/images/dogDefault.png')
 
-
 	def __unicode__(self):
 		return str(self.id)
 
@@ -35,3 +37,19 @@ class PastFoodDog(models.Model):
 
 	def __unicode__(self):
 		return str(self.id) + food
+
+class ReferralCode(models.Model):
+	user = models.ForeignKey(UserProfile)
+	code = models.CharField(blank=False, max_length=128)
+	# discount
+
+	def __unicode__(self):
+		return self.code
+
+# class PromoCode(models.Model):
+# 	code = models.CharField(blank=False, max_length=128)
+# 	# valid = models.DateTimeField(blank=False)
+
+# 	def __unicode__(self):
+# 		return code
+

@@ -65,27 +65,25 @@ $scope.showmecat = true;
 $scope.showmedog = false;
 };
 
-$scope.postRequest = function() {
-	// var data = $.param({
-	// 	'email' : $scope.email
-	// })
+
+
+}]);
+
+routingpage.controller('temp', ['$scope', '$log', '$http', function ($scope,$http,$log) {
+
+	$scope.postRequest = function() {
 
 	var data = JSON.stringify({'email': $scope.email});
 
     $http.post('/app/email/', data, config)
-    	.success(function (data, status, headers, config) {
-    			$scope.uId = data.uId,
-                $scope.petId = data.petId
-            })
-        .error(function (data, status, header, config) {
-            $log.log("Data: " + data +
-                ",status: " + status +
-                ",headers: " + header +
-                ",config: " + config;);
-        });
-
-}
-
+    	.then(function(response){
+    		console.log(response.data);
+    	}, function(response){
+    		console.log("Something is WRONG");
+    		// console.log(response.data);
+    	});
+	};
+	
 }]);
 
 routingpage.controller("strtctrl2",["$scope","$log",function($scope,$log){
@@ -152,6 +150,7 @@ routingpage.config(["$routeProvider","$locationProvider","$httpProvider",functio
 $routeProvider
 	.when('/', {
         templateUrl : 'emailpage.html',
+        controller : 'temp'
 	})
 	.when('/dogbutton', {
         templateUrl : 'breeddog.html',
