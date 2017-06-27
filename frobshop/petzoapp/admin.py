@@ -4,3 +4,4 @@ from models import *
 admin.site.register(UserProfile)
 admin.site.register(Dog)
 admin.site.register(PastFoodDog)
+admin.site.register(ReferralCode)

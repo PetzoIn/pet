@@ -9,9 +9,9 @@ class UserProfile(models.Model):
 	name = models.CharField(blank=True, max_length=128)
 	phone = models.CharField(blank=True, max_length=10)
 	address = models.TextField(blank=True)
-	referral = models.BooleanField(default=False)
+	referral_taken = models.BooleanField(default=False)
 	no_of_referred_users = models.IntegerField(default=0)
-	user_credit = models.DecimalField(max_digits=8, decimal_places=3)
+	user_credit = models.DecimalField(max_digits=8, decimal_places=3, default=0)
 
 	def __unicode__(self):
 		return self.name
@@ -41,7 +41,8 @@ class PastFoodDog(models.Model):
 class ReferralCode(models.Model):
 	user = models.ForeignKey(UserProfile)
 	code = models.CharField(blank=False, max_length=128)
-	# discount
+	discount_giver = models.FloatField(blank=False)
+	discount_taker = models.FloatField(blank=False)
 
 	def __unicode__(self):
 		return self.code
