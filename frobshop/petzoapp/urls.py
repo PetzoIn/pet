@@ -5,5 +5,5 @@ from petzoapp.views import *
 urlpatterns = [
 	url(r'^$', index, name='Home'),
 	url(r'^email/$', email, name='email'),
-	url(r'^applyCodes/$', applyCodes, name='applyCodes'),
+	url(r'^addVoucher/$', addVoucher, name='addVoucher'),
 ]

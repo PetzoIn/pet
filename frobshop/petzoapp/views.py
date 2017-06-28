@@ -1,13 +1,18 @@
 from django.shortcuts import render, redirect
 from django.http import HttpResponse, JsonResponse, Http404, HttpResponseRedirect
 from django.contrib.auth.models import User
+from django.contrib import messages
 import requests, json
 
 from oscar.apps.basket.models import Basket
 from oscar.apps.basket import views
 from oscar.apps.basket.views import BasketView
+from oscar.apps.basket import signals
 from oscar.apps.partner.strategy import Selector
 from oscar.apps.voucher.models import Voucher
+
+from oscar.core.loading import get_model
+from oscar.core.utils import redirect_to_referrer
 
 from models import *
 
@@ -20,9 +25,9 @@ def email(request):
 	else:
 		raise Http404()
 
-def applyCodes(request):
+def addVoucher(request):
 	if request.method == 'POST':
-		CODE = request.POST.get('code')
+		code = request.POST.get('code')
 		user = request.user
 		userProfile, created = UserProfile.objects.get_or_create(user=user)
 		basket = request.basket
@@ -30,15 +35,61 @@ def applyCodes(request):
 			'status' : '',
 			'message' : '',
 		}
-		print 'CODE : ', CODE
+		print 'code : ', code
 		print 'user : ', user
 		print 'userProfile : ', userProfile
-		print 'request = ', request
+		print 'request : ', request
 		print 'request.basket : ', request.basket
-		
-		request.session['voucher_response'] = response
 
-		return HttpResponseRedirect('/basket/')
+		if not request.basket.id:
+			return redirect_to_referrer(request, 'basket:summary')
+
+		if request.CODE and request.CODE == code:
+			messages.error(
+				request,
+				 _("You have already added the '%(code)s' voucher to your basket") % {'code': code})
+		else:
+			
+			request.CODE = ''
+
+			try:
+				
+				# Referral
+				if code[0] == 'R':
+					pass
+
+				# Vet
+				elif code[0] == 'V':
+					pass
+
+				# Coupon
+				else:
+					voucher = Voucher.objects.get(code=code)
+				
+
+			except Exception as e:
+				messages.error(
+					request, 
+					_("No voucher found with code '%(code)s'") % {'code': code})
+
+			else:
+
+				# Coupon
+				if voucher:
+					apply_voucher_to_basket(voucher)
+
+
+				else:
+					request.CODE = code
+					# Deciaml Value
+					total_incl_tax_excl_discounts = basket._get_total('line_price_incl_tax')
+
+
+
+		# request.session['voucher_response'] = response
+
+		# return redirect_to_referrer(request, default)
+		# return HttpResponseRedirect('/basket/')
 		# return render(request, 'basket/basket_content.html')
 		# r = requests.post('/basket/', response=response)
 

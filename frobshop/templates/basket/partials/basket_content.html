@@ -131,7 +131,7 @@
                     </p>
 
                     <div id="voucher_form_container" style="display:none">
-                        <form id="voucher_form" action="/app/applyCodes/" method="post">
+                        <form id="voucher_form" action="/app/addVoucher/" method="post">
                             {% csrf_token %}
                             {% include "partials/form_fields.html" with form=voucher_form %}
                             <button type="submit" class="btn btn-info" data-loading-text="{% trans 'Adding...' %}">{% trans "Add voucher" %}</button>
