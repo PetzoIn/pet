@@ -1,5 +1,5 @@
-from django.shortcuts import render
-from django.http import HttpResponse, JsonResponse
+from django.shortcuts import render, redirect
+from django.http import HttpResponse, JsonResponse, Http404
 from django.contrib.auth.models import User
 
 from oscar.apps.basket.models import Basket
@@ -13,18 +13,30 @@ def index(request):
 	return HttpResponse('Main App')
 
 def email(request):
-	if request.Method == 'POST':
+	if request.method == 'POST':
 		print request.POST.get('email')
+	else:
+		raise Http404()
 
 def applyCodes(request):
 	if request.method == 'POST':
-		code = request.POST.get('CODE')
+		CODE = request.POST.get('code')
 		user = request.user
 		userProfile, created = UserProfile.objects.get_or_create(user=user)
 		response = {
 			'status' : '',
 			'message' : '',
 		}
+		print 'CODE : ', CODE
+		print 'user : ', user
+		print 'userProfile : ', userProfile
+		print 'request = ', request
+		print 'request.basket : ', request.basket
+
+		return redirect('/basket/', request)
+		# return render(request, 'basket/basket.html')
+
+		'''
 
 		# Referral
 		if code[0] == 'R':
@@ -70,6 +82,8 @@ def applyCodes(request):
 		# Coupon
 		else:
 			pass
+
+		'''
 
 	else:
 		pass
