@@ -24,9 +24,6 @@
 
 {% block content %}
     {# Use a partial template so that AJAX can be used to re-render basket #}
-    {% if respPOST %}
-        <h1>CODE APPLIED !</h1>
-    {% endif %}
     {% include 'basket/partials/basket_content.html' %}
     
 {% endblock content %}

@@ -5,13 +5,12 @@ from django.contrib import messages
 import requests, json
 
 from oscar.apps.basket.models import Basket
-from oscar.apps.basket import views
-from oscar.apps.basket.views import BasketView
-from oscar.apps.basket import signals
+from oscar.apps.basket import views, signals
+from oscar.apps.basket.views import BasketView, VoucherAddView, VoucherRemoveView
 from oscar.apps.partner.strategy import Selector
 from oscar.apps.voucher.models import Voucher
 
-from oscar.core.loading import get_model
+from oscar.core.loading import get_model, get_class
 from oscar.core.utils import redirect_to_referrer
 
 from models import *
@@ -90,13 +89,13 @@ def addVoucher(request):
 				# Coupon
 				if voucher:
 					request.session['CODE'] = code
-					# apply_voucher_to_basket(voucher)
+					apply_voucher_to_basket(request, voucher)
 
 
 				else:
 					request.session['CODE'] = code
 					# Deciaml Value
-					
+					apply_discount_to_basket(discount_to_be_applied)
 
 				return redirect_to_referrer(request, 'basket:summary')
 
@@ -160,4 +159,44 @@ def addVoucher(request):
 	else:
 		pass
 		
+
+def apply_voucher_to_basket(request, voucher):
+	if voucher.is_expired():
+		messages.error(request, ("The '%(code)s' voucher has expired") % {'code': voucher.code})
+		return
+
+	if not voucher.is_active():
+		messages.error(request, ("The '%(code)s' voucher is not active") % {'code': voucher.code})
+		return
+
+	is_available, message = voucher.is_available_to_user(request.user)
+	
+	if not is_available:
+		messages.error(request, message)
+		return
+
+	request.basket.vouchers.add(voucher)
+	add_signal = signals.voucher_addition
+	add_signal.send(sender=VoucherAddView, basket=request.basket, voucher=voucher)
+	
+	Applicator = get_class('offer.utils', 'Applicator')
+
+	Applicator().apply(request.basket, request.user, request)
+	discounts_after = request.basket.offer_applications
+	
+	# Look for discounts from this new voucher
+	found_discount = False
+	for discount in discounts_after:
+		if discount['voucher'] and discount['voucher'] == voucher:
+			found_discount = True
+			break
+
+	if not found_discount:
+		messages.warning(request,
+			("Your basket does not qualify for a voucher discount"))
+		request.basket.vouchers.remove(voucher)
+	else:
+		messages.info(request,
+			("Voucher '%(code)s' added to basket") % {'code': voucher.code})
+	return
 
