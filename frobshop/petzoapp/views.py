@@ -1,8 +1,10 @@
 from django.shortcuts import render, redirect
-from django.http import HttpResponse, JsonResponse, Http404
+from django.http import HttpResponse, JsonResponse, Http404, HttpResponseRedirect
 from django.contrib.auth.models import User
+import requests, json
 
 from oscar.apps.basket.models import Basket
+from oscar.apps.basket import views
 from oscar.apps.basket.views import BasketView
 from oscar.apps.partner.strategy import Selector
 from oscar.apps.voucher.models import Voucher
@@ -23,6 +25,7 @@ def applyCodes(request):
 		CODE = request.POST.get('code')
 		user = request.user
 		userProfile, created = UserProfile.objects.get_or_create(user=user)
+		basket = request.basket
 		response = {
 			'status' : '',
 			'message' : '',
@@ -32,9 +35,12 @@ def applyCodes(request):
 		print 'userProfile : ', userProfile
 		print 'request = ', request
 		print 'request.basket : ', request.basket
+		
+		request.session['voucher_response'] = response
 
-		return redirect('/basket/', request)
-		# return render(request, 'basket/basket.html')
+		return HttpResponseRedirect('/basket/')
+		# return render(request, 'basket/basket_content.html')
+		# r = requests.post('/basket/', response=response)
 
 		'''
 
