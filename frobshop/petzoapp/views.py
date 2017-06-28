@@ -44,19 +44,30 @@ def addVoucher(request):
 		if not request.basket.id:
 			return redirect_to_referrer(request, 'basket:summary')
 
-		if request.CODE and request.CODE == code:
+		if 'CODE' in request.session and request.session.get('CODE') == code:
 			messages.error(
 				request,
-				 _("You have already added the '%(code)s' voucher to your basket") % {'code': code})
+				 ("You have already added the '%(code)s' voucher to your basket") % {'code': code})
+
+			return redirect_to_referrer(request, 'basket:summary')
+
 		else:
-			
-			request.CODE = ''
+
+			# Apply the code to this price
+			total_incl_tax_excl_discounts = basket._get_total('line_price_incl_tax')
 
 			try:
 				
 				# Referral
 				if code[0] == 'R':
-					pass
+					if userProfile.referral_taken == False:
+						referral_model = ReferralCode.objects.get(code=code)
+						discount_to_be_applied = referral_model.discount_taker * total_incl_tax_excl_discounts
+
+					else:
+						messages.error(
+							request, 
+							'You have already used a General Referral Code')
 
 				# Vet
 				elif code[0] == 'V':
@@ -70,20 +81,24 @@ def addVoucher(request):
 			except Exception as e:
 				messages.error(
 					request, 
-					_("No voucher found with code '%(code)s'") % {'code': code})
+					("No voucher found with code '%(code)s'") % {'code': code})
+
+				return redirect_to_referrer(request, 'basket:summary')
 
 			else:
 
 				# Coupon
 				if voucher:
-					apply_voucher_to_basket(voucher)
+					request.session['CODE'] = code
+					# apply_voucher_to_basket(voucher)
 
 
 				else:
-					request.CODE = code
+					request.session['CODE'] = code
 					# Deciaml Value
-					total_incl_tax_excl_discounts = basket._get_total('line_price_incl_tax')
+					
 
+				return redirect_to_referrer(request, 'basket:summary')
 
 
 		# request.session['voucher_response'] = response
