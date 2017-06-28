@@ -200,3 +200,27 @@ def apply_voucher_to_basket(request, voucher):
 			("Voucher '%(code)s' added to basket") % {'code': voucher.code})
 	return
 
+
+# url(r'^vouchers/(?P<pk>\d+)/remove/$', remove_voucher_view.as_view(), name='vouchers-remove'),
+def remove_voucher_from_basket(request):
+	if request.method == 'POST':
+		remove_signal = signals.voucher_removal
+		code = request.POST.get('code')
+		try:
+
+			if not request.basket.id:
+				return redirect('/basket/')
+
+			voucher = Voucher.objects.get(code=code)
+			request.basket.vouchers.remove(voucher)
+			remove_signal.send(sender=VoucherRemoveView, basket=request.basket, voucher=voucher)
+			messages.info(request, ("Voucher '%s' removed from basket") % voucher.code)
+
+
+		except Exception as e:
+			messages.error(request, ("No voucher found with code '%(code)s' ") % {'code': code})
+
+		return redirect('/basket/')
+
+	else:
+		pass
