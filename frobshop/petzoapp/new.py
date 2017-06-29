@@ -13,6 +13,8 @@ from oscar.apps.voucher.models import Voucher
 from oscar.core.loading import get_model, get_class
 from oscar.core.utils import redirect_to_referrer
 
+from random import randint
+
 from models import *
 
 def testReferral(request):
@@ -23,4 +25,7 @@ def testReferral(request):
 			code = r.code
 			request.session['referral_code'] = code
 			return redirect_to_referrer(request,'/')
-		
+		except as Exception as e:
+			ran = randint(1000,9999)
+			referral_code = 'R'+request.user.first_name+ran
+
