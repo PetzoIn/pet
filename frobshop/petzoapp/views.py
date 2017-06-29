@@ -64,11 +64,13 @@ def addVoucher(request):
 						referee = referral_model.user
 						refereeProfile = UserProfile.objects.get_or_create(user=referee)
 						discount_to_be_applied = referral_model.discount_taker * total_incl_tax_excl_discounts
+						voucher = Voucher.objects.get(code=code)
+						request.session['CODE'] = code
+						apply_voucher_to_basket(request, voucher)
 
 					else:
-						messages.error(
-							request, 
-							'You have already used a General Referral Code')
+						messages.error(request, 'You have already used a General Referral Code')
+						return redirect_to_referrer(request, 'basket:summary')
 
 				# Vet
 				elif code[0] == 'V':
@@ -80,18 +82,14 @@ def addVoucher(request):
 				
 
 			except Exception as e:
-				messages.error(
-					request, 
-					("No voucher found with code '%(code)s'") % {'code': code})
-
+				messages.error(request, ("No voucher found with code '%(code)s'") % {'code': code})
 				return redirect_to_referrer(request, 'basket:summary')
 
 			else:
 
 				# Coupon
-				if voucher:
-					request.session['CODE'] = code
-					apply_voucher_to_basket(request, voucher)
+				request.session['CODE'] = code
+				apply_voucher_to_basket(request, voucher)
 
 
 				else:
