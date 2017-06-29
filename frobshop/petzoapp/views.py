@@ -13,6 +13,8 @@ from oscar.apps.voucher.models import Voucher
 from oscar.core.loading import get_model, get_class
 from oscar.core.utils import redirect_to_referrer
 
+import razorpay
+
 from models import *
 
 def index(request):
@@ -53,6 +55,7 @@ def addVoucher(request):
 		else:
 
 			# Apply the code to this price
+
 			total_incl_tax_excl_discounts = basket._get_total('line_price_incl_tax')
 
 			try:
@@ -65,8 +68,6 @@ def addVoucher(request):
 						refereeProfile = UserProfile.objects.get_or_create(user=referee)
 						discount_to_be_applied = referral_model.discount_taker * total_incl_tax_excl_discounts
 						voucher = Voucher.objects.get(code=code)
-						request.session['CODE'] = code
-						apply_voucher_to_basket(request, voucher)
 
 					else:
 						messages.error(request, 'You have already used a General Referral Code')
@@ -90,12 +91,6 @@ def addVoucher(request):
 				# Coupon
 				request.session['CODE'] = code
 				apply_voucher_to_basket(request, voucher)
-
-
-				else:
-					request.session['CODE'] = code
-					# Deciaml Value
-					apply_discount_to_basket(request, total_incl_tax_excl_discounts, discount_to_be_applied)
 
 				return redirect_to_referrer(request, 'basket:summary')
 
@@ -224,6 +219,3 @@ def remove_voucher_from_basket(request):
 
 	else:
 		pass
-
-def apply_discount_to_basket(request, total_incl_tax_excl_discounts, discount_to_be_applied):
-	pass
