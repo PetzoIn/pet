@@ -219,3 +219,8 @@ def remove_voucher_from_basket(request):
 
 	else:
 		pass
+
+def checkout(request):
+	client = razorpay.Client(auth=("rzp_test_35cVWM6ho9fNqF", "1SqPJcVH1FJmJCyT7UavEdhX"))
+	client.set_app_details({"title" : "Petzo", "1.0" : "1.0"})
+	
