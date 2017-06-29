@@ -61,6 +61,8 @@ def addVoucher(request):
 				if code[0] == 'R':
 					if userProfile.referral_taken == False:
 						referral_model = ReferralCode.objects.get(code=code)
+						referee = referral_model.user
+						refereeProfile = UserProfile.objects.get_or_create(user=referee)
 						discount_to_be_applied = referral_model.discount_taker * total_incl_tax_excl_discounts
 
 					else:
@@ -95,7 +97,7 @@ def addVoucher(request):
 				else:
 					request.session['CODE'] = code
 					# Deciaml Value
-					apply_discount_to_basket(discount_to_be_applied)
+					apply_discount_to_basket(request, total_incl_tax_excl_discounts, discount_to_be_applied)
 
 				return redirect_to_referrer(request, 'basket:summary')
 
@@ -224,3 +226,6 @@ def remove_voucher_from_basket(request):
 
 	else:
 		pass
+
+def apply_discount_to_basket(request, total_incl_tax_excl_discounts, discount_to_be_applied):
+	pass

@@ -39,7 +39,7 @@ class PastFoodDog(models.Model):
 		return str(self.id) + food
 
 class ReferralCode(models.Model):
-	user = models.ForeignKey(UserProfile)
+	user = models.ForeignKey(User)
 	code = models.CharField(blank=False, max_length=128)
 	discount_giver = models.FloatField(blank=False)
 	discount_taker = models.FloatField(blank=False)
