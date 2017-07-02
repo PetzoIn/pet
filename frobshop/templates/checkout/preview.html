@@ -1,0 +1,89 @@
+{% extends "checkout/checkout.html" %}
+{% load i18n %}
+{% load static %}
+{% block title %}
+    {% trans "Order preview" %} | {{ block.super }}
+{% endblock %}
+
+{% block checkout_nav %}
+    {% include 'checkout/nav.html' with step=4 %}
+{% endblock %}
+
+{% block checkout_title %}
+    {% trans "Preview order" %}
+{% endblock %}
+
+{% block place_order %}
+    <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+
+    {# <form method="post" action="{% url 'checkout:preview' %}" id="place_order_form"> #}
+    <form method="post" action="/purchase" id="place_order_form">
+        {% csrf_token %}
+        
+        {% comment %}
+            When submitting sensitive data on the payment details page (eg a bankcard)
+            we don't want to save the data and so we pass the bound form to the preview
+            template and render it in a hidden div.  Then the payment information will
+            get re-submitted when the user confirms the order.
+        {% endcomment %}
+
+        <div class="form-group clearfix">
+            <div class="row">
+                <div class="col-sm-3 col-sm-offset-9">
+                     <button id='place-order' type="submit" class="btn btn-primary btn-lg btn-block razorpay-payment-button" data-loading-text="{% trans 'Submitting...' %}">{% trans "Pay Now" %}</button>
+                </div>
+            </div>
+        </div>
+    </form>
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+    <script type="text/javascript">
+        var data;
+        var options;
+        var rzp1;
+        $( document ).ready(function() {
+            console.log( "ready!" );
+            $.ajax({
+                url: '/app/userInfoForOrderPayment/',
+                type: 'GET',
+                dataType: 'json',
+                success: function (response) {
+                    console.log('success');
+                    console.log(response);
+
+                    options = {
+                        "key": "rzp_test_35cVWM6ho9fNqF",
+                        "amount": response.amount*100, // 2000 paise = INR 20
+                        "name": "Petzo India",
+                        "description": "Purchase Description",
+                        "image": "/your_logo.png",
+                        "handler": function (response){
+                            alert(response.razorpay_payment_id);
+                        },
+                        "prefill": {
+                            "name": response.name,
+                            "email": response.email
+                        },
+                        "notes": {
+                            "address": "Hello World"
+                        },
+                        "theme": {
+                            "color": "#F37254"
+                        }
+                    };
+
+                    rzp1 = new Razorpay(options);
+
+                },
+                error: function() {
+                    console.log('error');
+                    console.log(response);
+                }
+            });
+            document.getElementById('place-order').onclick = function(e){
+                rzp1.open();
+                e.preventDefault();
+            }
+        });
+    </script>
+
+{% endblock place_order %}

@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<head>
+      <title></title>
+      <meta name="viewport" content="width=device-width">
+      <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+</head>
+<body>
+<button id="place-order">Submit</button>
+</body>
+</html>
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<script type="text/javascript">
+        var data;
+        var options;
+        var rzp1;
+        $( document ).ready(function() {
+            console.log( "ready!" );
+            $.ajax({
+                url: '/app/userInfoForOrderPayment/',
+                type: 'GET',
+                dataType: 'json',
+                // data: {param1: 'value1'},
+                success: function (response) {
+                    console.log('success');
+                    console.log(response);
+
+                    options = {
+                        "key": "rzp_test_35cVWM6ho9fNqF",
+                        "amount": response.amount*100, // 2000 paise = INR 20
+                        "name": "Petzo India",
+                        "description": "Purchase Description",
+                        "image": "/your_logo.png",
+                        "handler": function (response){
+                            alert(response.razorpay_payment_id);
+                        },
+                        "prefill": {
+                            "name": response.name,
+                            "email": response.email
+                        },
+                        "notes": {
+                            "address": "Hello World"
+                        },
+                        "theme": {
+                            "color": "#F37254"
+                        }
+                    };
+
+                    rzp1 = new Razorpay(options);
+
+                },
+                error: function() {
+                    console.log('error');
+                    console.log(response);
+                }
+            });
+            document.getElementById('place-order').onclick = function(e){
+                rzp1.open();
+                e.preventDefault();
+            }
+        });
+</script>

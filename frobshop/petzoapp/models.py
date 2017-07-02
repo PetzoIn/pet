@@ -14,7 +14,7 @@ class UserProfile(models.Model):
 	user_credit = models.DecimalField(max_digits=8, decimal_places=3, default=0)
 
 	def __unicode__(self):
-		return self.name
+		return str(self.user)
 
 class Dog(models.Model):
 	owner = models.ForeignKey(User)

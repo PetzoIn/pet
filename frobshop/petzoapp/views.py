@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect
 from django.http import HttpResponse, JsonResponse, Http404, HttpResponseRedirect
 from django.contrib.auth.models import User
 from django.contrib import messages
-import requests, json
+import requests, json, simplejson
 
 from oscar.apps.basket.models import Basket
 from oscar.apps.basket import views, signals
@@ -31,6 +31,9 @@ def addVoucher(request):
 		code = request.POST.get('code')
 		user = request.user
 		userProfile, created = UserProfile.objects.get_or_create(user=user)
+		if created:
+			userProfile.name = user.first_name + " " + user.last_name
+			userProfile.save()
 		basket = request.basket
 		response = {
 			'status' : '',
@@ -223,4 +226,27 @@ def remove_voucher_from_basket(request):
 def checkout(request):
 	client = razorpay.Client(auth=("rzp_test_35cVWM6ho9fNqF", "1SqPJcVH1FJmJCyT7UavEdhX"))
 	client.set_app_details({"title" : "Petzo", "1.0" : "1.0"})
-	
+	order_amoount = ''
+	order_currency = 'INR'
+
+def test(request):
+	return render(request, 'razorpay/checkout.html')
+
+def userInfoForOrderPayment(request):
+	if request.method == 'GET':
+		user = request.user
+		userProfile, created = UserProfile.objects.get_or_create(user=user)
+		basket = request.basket
+		if not request.basket.id:
+			raise Http404('UnAuthorised')
+		amount = simplejson.dumps(basket.total_incl_tax)
+		data = {
+			'name' : user.first_name + " " + user.last_name,
+			'phone' : userProfile.phone,
+			'email' : user.email,
+			'amount' : amount
+		}
+		request.session['userInfo'] = data
+		# return redirect('/checkout/preview/')
+		data = json.dumps(data)
+		return HttpResponse(data)
