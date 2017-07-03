@@ -52,6 +52,7 @@
 
                     options = {
                         "key": "rzp_test_35cVWM6ho9fNqF",
+                        "order_id": response.order_id,
                         "amount": response.amount*100, // 2000 paise = INR 20
                         "name": "Petzo India",
                         "description": "Purchase Description",
@@ -89,7 +90,7 @@
                     rzp1 = new Razorpay(options);
 
                 },
-                error: function() {
+                error: function(response) {
                     console.log('error');
                     console.log(response);
                 }

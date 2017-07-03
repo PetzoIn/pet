@@ -10,6 +10,7 @@ from oscar.apps.basket import views, signals
 from oscar.apps.basket.views import BasketView, VoucherAddView, VoucherRemoveView
 from oscar.apps.partner.strategy import Selector
 from oscar.apps.voucher.models import Voucher
+from oscar.apps.checkout.views import PaymentDetailsView
 
 from oscar.core.loading import get_model, get_class
 from oscar.core.utils import redirect_to_referrer
@@ -241,16 +242,34 @@ def userInfoForOrderPayment(request):
 		userProfile, created = UserProfile.objects.get_or_create(user=user)
 		basket = request.basket
 		if not request.basket.id:
-			raise Http404('UnAuthorised')
+			raise Http404('Unauthorised')
 		amount = simplejson.dumps(basket.total_incl_tax)
+		p = PaymentDetailsView()
+		order_number = p.generate_order_number(basket)
+		# request.session['amount'] = amount
+		# request.session['receipt'] = order_number
+		client = razorpay.Client(auth=("rzp_test_35cVWM6ho9fNqF", "1SqPJcVH1FJmJCyT7UavEdhX"))
+		# client.order.create(amount=amount*100,currency='INR',receipt=order_number,notes={})
+		notes={}
+		a = int(basket.total_incl_tax)
+		receipt = str(order_number)
+		print a
+		d = {
+			'amount': a*100,
+			'currency':'INR',
+			'receipt':receipt,
+			'notes':{}
+		}
+		# amount = int(basket.total_incl_tax)*100
+		order = client.order.create(data=d)
 		data = {
 			'name' : user.first_name + " " + user.last_name,
 			'phone' : userProfile.phone,
 			'email' : user.email,
-			'amount' : amount
+			'amount' : amount,
+			'receipt': order_number,
+			'order_id': order["id"]
 		}
-		request.session['userInfo'] = data
-		# return redirect('/checkout/preview/')
 		data = json.dumps(data)
 		return HttpResponse(data)
 
@@ -271,10 +290,22 @@ def handle_payment(request):
 		amount = resp['amount']
 		status = resp['status']
 		resp = json.dumps(resp)
-		# order = client.order.fetch_all()
 		if status == 'authorized':
 			capture = client.payment.capture(razorpay_payment_id, amount)
 			capture = json.dumps(capture)
 			return HttpResponse(capture)
-			
+
 		return HttpResponse(resp)
+
+def testOscarOrder(request):
+	print request
+	basket = request.basket
+	p = PaymentDetailsView()
+	order_number = p.generate_order_number(basket)
+	client = razorpay.Client(auth=("rzp_test_35cVWM6ho9fNqF", "1SqPJcVH1FJmJCyT7UavEdhX"))
+	amount = request.session['amount']*100
+	receipt = request.session['receipt']
+	print amount
+	print receipt
+	client.order.create(amount=amount,currency='INR',receipt=receipt,notes={})
+	return HttpResponse('hi')
