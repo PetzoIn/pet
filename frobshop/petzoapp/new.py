@@ -15,6 +15,10 @@ from oscar.core.utils import redirect_to_referrer
 
 from random import randint
 
+from oscar.apps.voucher.models import Voucher
+from oscar.apps.offer.models import ConditionalOffer
+import datetime	
+
 from models import *
 
 def testReferral(request):
@@ -28,4 +32,16 @@ def testReferral(request):
 		except as Exception as e:
 			ran = randint(1000,9999)
 			referral_code = 'R'+request.user.first_name+ran
+
+			offer = ConditionalOffer.objects.get(name='testing')
+			name = referral_code
+			code = referral_code
+			usage = Voucher.ONCE_PER_CUSTOMER
+			start_date = datetime.datetime.now()
+			end_time = start_date + datetime.timedelta(days=2*365)
+			Voucher.objects.create(name=name, code=code, usage=usage, start_datetime=start_time, end_datetime=end_time)
+			v = Voucher.objects.get.(name='referral_code')
+			v.offers.add(offer)
+			v.save()
+
 
