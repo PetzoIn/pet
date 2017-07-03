@@ -31,7 +31,7 @@
                         "amount": 1000, // 2000 paise = INR 20
                         "name": "Petzo India",
                         "description": "Purchase Description",
-                        "image": "../static/images/petzo.png",
+                        "image": "{% static 'images/petzo.png' %}",
                         "handler": function (response){
                             alert(response.razorpay_payment_id);
                         },

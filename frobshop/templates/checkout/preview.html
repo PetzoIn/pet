@@ -55,7 +55,7 @@
                         "amount": response.amount*100, // 2000 paise = INR 20
                         "name": "Petzo India",
                         "description": "Purchase Description",
-                        "image": "/your_logo.png",
+                        "image": "{% static 'images/petzo.png' %}",
                         "handler": function (response){
                             // console.log(response);
                             $.ajax({
