@@ -44,7 +44,7 @@
             console.log( "ready!" );
             $.ajax({
                 url: '/app/userInfoForOrderPayment/',
-                type: 'GET',
+                type: 'POST',
                 dataType: 'json',
                 success: function (response) {
                     console.log('success');
@@ -57,11 +57,24 @@
                         "description": "Purchase Description",
                         "image": "/your_logo.png",
                         "handler": function (response){
-                            alert(response.razorpay_payment_id);
+                            console.log(response.razorpay_payment_id);
+                            $.ajax({
+                                url: '/app/handle_payment/',
+                                type: 'POST',
+                                dataType: 'json',
+                                data: {razorpay_payment_id: response.razorpay_payment_id},
+                                success: function(response) {
+                                    console.log('success');
+                                },
+                                error: function(response) {
+                                    console.log('Error');
+                                }
+                            });
                         },
                         "prefill": {
                             "name": response.name,
-                            "email": response.email
+                            "email": response.email,
+                            "contact": response.phone
                         },
                         "notes": {
                             "address": "Hello World"

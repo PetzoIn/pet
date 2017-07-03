@@ -2,6 +2,7 @@ from django.shortcuts import render, redirect
 from django.http import HttpResponse, JsonResponse, Http404, HttpResponseRedirect
 from django.contrib.auth.models import User
 from django.contrib import messages
+from django.views.decorators.csrf import csrf_exempt
 import requests, json, simplejson
 
 from oscar.apps.basket.models import Basket
@@ -226,14 +227,16 @@ def remove_voucher_from_basket(request):
 def checkout(request):
 	client = razorpay.Client(auth=("rzp_test_35cVWM6ho9fNqF", "1SqPJcVH1FJmJCyT7UavEdhX"))
 	client.set_app_details({"title" : "Petzo", "1.0" : "1.0"})
-	order_amoount = ''
-	order_currency = 'INR'
+	resp = client.payment.fetch_all()
+	print resp
+	return JsonResponse(resp)
 
 def test(request):
 	return render(request, 'razorpay/checkout.html')
 
+@csrf_exempt
 def userInfoForOrderPayment(request):
-	if request.method == 'GET':
+	if request.method == 'POST':
 		user = request.user
 		userProfile, created = UserProfile.objects.get_or_create(user=user)
 		basket = request.basket
@@ -248,5 +251,19 @@ def userInfoForOrderPayment(request):
 		}
 		request.session['userInfo'] = data
 		# return redirect('/checkout/preview/')
+		data = json.dumps(data)
+		return HttpResponse(data)
+
+	else:
+		raise Http404('UnAuthorised')
+
+@csrf_exempt
+def handle_payment(request):
+	if request.method == 'POST':
+		razorpay_payment_id = request.POST.get('razorpay_payment_id')
+		print 'razorpay_payment_id : ', razorpay_payment_id 
+		data = {
+			'razorpay_payment_id' : razorpay_payment_id
+		}
 		data = json.dumps(data)
 		return HttpResponse(data)
