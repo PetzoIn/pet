@@ -8,5 +8,5 @@ urlpatterns = [
 	url(r'^addVoucher/$', addVoucher, name='addVoucher'),
 	url(r'^userInfoForOrderPayment/$', userInfoForOrderPayment, name='userInfoForOrderPayment'),
 	url(r'^handle_payment/$', handle_payment, name='handle_payment'),
-	url(r'^rzp/$', checkout, name='rzp'),
+	url(r'^rzp/$', test, name='rzp'),
 ]

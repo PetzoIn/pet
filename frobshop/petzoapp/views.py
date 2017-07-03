@@ -255,15 +255,26 @@ def userInfoForOrderPayment(request):
 		return HttpResponse(data)
 
 	else:
-		raise Http404('UnAuthorised')
+		raise Http404('Unauthorised')
 
 @csrf_exempt
 def handle_payment(request):
 	if request.method == 'POST':
+		client = razorpay.Client(auth=("rzp_test_35cVWM6ho9fNqF", "1SqPJcVH1FJmJCyT7UavEdhX"))
 		razorpay_payment_id = request.POST.get('razorpay_payment_id')
 		print 'razorpay_payment_id : ', razorpay_payment_id 
 		data = {
 			'razorpay_payment_id' : razorpay_payment_id
 		}
 		data = json.dumps(data)
-		return HttpResponse(data)
+		resp = client.payment.fetch(razorpay_payment_id)
+		amount = resp['amount']
+		status = resp['status']
+		resp = json.dumps(resp)
+		# order = client.order.fetch_all()
+		if status == 'authorized':
+			capture = client.payment.capture(razorpay_payment_id, amount)
+			capture = json.dumps(capture)
+			return HttpResponse(capture)
+			
+		return HttpResponse(resp)

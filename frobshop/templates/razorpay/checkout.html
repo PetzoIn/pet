@@ -1,3 +1,4 @@
+{% load static %}
 <!DOCTYPE html>
 <html>
 <head>
@@ -18,7 +19,7 @@
             console.log( "ready!" );
             $.ajax({
                 url: '/app/userInfoForOrderPayment/',
-                type: 'GET',
+                type: 'POST',
                 dataType: 'json',
                 // data: {param1: 'value1'},
                 success: function (response) {
@@ -27,16 +28,17 @@
 
                     options = {
                         "key": "rzp_test_35cVWM6ho9fNqF",
-                        "amount": response.amount*100, // 2000 paise = INR 20
+                        "amount": 1000, // 2000 paise = INR 20
                         "name": "Petzo India",
                         "description": "Purchase Description",
-                        "image": "/your_logo.png",
+                        "image": "{% static 'images/petzo.png' %}",
                         "handler": function (response){
                             alert(response.razorpay_payment_id);
                         },
                         "prefill": {
                             "name": response.name,
-                            "email": response.email
+                            "email": response.email,
+                            "contact": response.phone
                         },
                         "notes": {
                             "address": "Hello World"

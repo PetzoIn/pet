@@ -55,9 +55,9 @@
                         "amount": response.amount*100, // 2000 paise = INR 20
                         "name": "Petzo India",
                         "description": "Purchase Description",
-                        "image": "/your_logo.png",
+                        "image": "{% static 'images/petzo.png' %}",
                         "handler": function (response){
-                            console.log(response.razorpay_payment_id);
+                            // console.log(response);
                             $.ajax({
                                 url: '/app/handle_payment/',
                                 type: 'POST',
@@ -65,9 +65,11 @@
                                 data: {razorpay_payment_id: response.razorpay_payment_id},
                                 success: function(response) {
                                     console.log('success');
+                                    console.log(response);
                                 },
                                 error: function(response) {
                                     console.log('Error');
+                                    console.log(response);
                                 }
                             });
                         },
