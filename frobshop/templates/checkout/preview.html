@@ -57,7 +57,7 @@
                         "description": "Purchase Description",
                         "image": "/your_logo.png",
                         "handler": function (response){
-                            console.log(response.razorpay_payment_id);
+                            // console.log(response);
                             $.ajax({
                                 url: '/app/handle_payment/',
                                 type: 'POST',
@@ -65,9 +65,11 @@
                                 data: {razorpay_payment_id: response.razorpay_payment_id},
                                 success: function(response) {
                                     console.log('success');
+                                    console.log(response);
                                 },
                                 error: function(response) {
                                     console.log('Error');
+                                    console.log(response);
                                 }
                             });
                         },
