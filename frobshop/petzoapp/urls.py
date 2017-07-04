@@ -10,4 +10,5 @@ urlpatterns = [
 	url(r'^handle_payment/$', handle_payment, name='handle_payment'),
 	url(r'^testOscarOrder/$', testOscarOrder, name='testOscarOrder'),
 	url(r'^rzp/$', test, name='rzp'),
+	url(r'^address/$', address, name='address'),
 ]

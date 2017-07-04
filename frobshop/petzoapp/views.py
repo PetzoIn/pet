@@ -10,7 +10,9 @@ from oscar.apps.basket import views, signals
 from oscar.apps.basket.views import BasketView, VoucherAddView, VoucherRemoveView
 from oscar.apps.partner.strategy import Selector
 from oscar.apps.voucher.models import Voucher
-from oscar.apps.checkout.views import PaymentDetailsView
+from oscar.apps.checkout.views import PaymentDetailsView, ShippingAddressView
+from oscar.apps.checkout.mixins import OrderPlacementMixin
+from oscar.apps.checkout.utils import CheckoutSessionData
 
 from oscar.core.loading import get_model, get_class
 from oscar.core.utils import redirect_to_referrer
@@ -225,13 +227,6 @@ def remove_voucher_from_basket(request):
 	else:
 		pass
 
-def checkout(request):
-	client = razorpay.Client(auth=("rzp_test_35cVWM6ho9fNqF", "1SqPJcVH1FJmJCyT7UavEdhX"))
-	client.set_app_details({"title" : "Petzo", "1.0" : "1.0"})
-	resp = client.payment.fetch_all()
-	print resp
-	return JsonResponse(resp)
-
 def test(request):
 	return render(request, 'razorpay/checkout.html')
 
@@ -243,24 +238,21 @@ def userInfoForOrderPayment(request):
 		basket = request.basket
 		if not request.basket.id:
 			raise Http404('Unauthorised')
-		amount = simplejson.dumps(basket.total_incl_tax)
+		# amount = simplejson.dumps(basket.total_incl_tax)
 		p = PaymentDetailsView()
 		order_number = p.generate_order_number(basket)
 		# request.session['amount'] = amount
 		# request.session['receipt'] = order_number
 		client = razorpay.Client(auth=("rzp_test_35cVWM6ho9fNqF", "1SqPJcVH1FJmJCyT7UavEdhX"))
-		# client.order.create(amount=amount*100,currency='INR',receipt=order_number,notes={})
-		notes={}
-		a = int(basket.total_incl_tax)
+		amount = int(basket.total_incl_tax) * 100
 		receipt = str(order_number)
-		print a
+		print amount
 		d = {
-			'amount': a*100,
+			'amount': amount,
 			'currency':'INR',
 			'receipt':receipt,
 			'notes':{}
 		}
-		# amount = int(basket.total_incl_tax)*100
 		order = client.order.create(data=d)
 		data = {
 			'name' : user.first_name + " " + user.last_name,
@@ -271,6 +263,7 @@ def userInfoForOrderPayment(request):
 			'order_id': order["id"]
 		}
 		data = json.dumps(data)
+		print request.session["checkout_data"]
 		return HttpResponse(data)
 
 	else:
@@ -282,19 +275,38 @@ def handle_payment(request):
 		client = razorpay.Client(auth=("rzp_test_35cVWM6ho9fNqF", "1SqPJcVH1FJmJCyT7UavEdhX"))
 		razorpay_payment_id = request.POST.get('razorpay_payment_id')
 		print 'razorpay_payment_id : ', razorpay_payment_id 
-		data = {
-			'razorpay_payment_id' : razorpay_payment_id
-		}
-		data = json.dumps(data)
 		resp = client.payment.fetch(razorpay_payment_id)
 		amount = resp['amount']
 		status = resp['status']
-		resp = json.dumps(resp)
+
 		if status == 'authorized':
 			capture = client.payment.capture(razorpay_payment_id, amount)
+			if capture["captured"] == True:
+				print "******Captured Successfully******"
+				p = PaymentDetailsView()
+				order_number = p.generate_order_number(request.basket)
+				user = request.user
+				basket = request.basket
+
+				# place_order = OrderPlacementMixin
+				# .handle_order_placement(order_number, user, basket, shipping_address, shipping_method, shipping_charge, billing_address, order_total)
+
 			capture = json.dumps(capture)
+			# p = PaymentDetailsView()
+			# order_number = p.generate_order_number(request.basket)
+			# receipt = str(order_number)
+			# data = {
+			# 	'amount': amount,
+			# 	'currency':'INR',
+			# 	'receipt':receipt,
+			# 	'notes':{}
+			# }
+			# invoice = client.invoice.create(data=data)
+			# print 'invoice'
+			# print invoice
 			return HttpResponse(capture)
 
+		resp = json.dumps(resp)
 		return HttpResponse(resp)
 
 def testOscarOrder(request):
@@ -309,3 +321,26 @@ def testOscarOrder(request):
 	print receipt
 	client.order.create(amount=amount,currency='INR',receipt=receipt,notes={})
 	return HttpResponse('hi')
+
+# from oscar.apps.shipping.methods import NoShippingRequired
+# def address(request):
+# 	if request.method == 'POST':
+# 		if request.user.is_authenticated():
+# 			if 'address_id' in request.POST:
+# 				UserAddress = get_model('address', 'UserAddress')
+# 				address = UserAddress._default_manager.get(pk=request.POST.get('address_id'), user=request.user)
+# 				action = request.POST.get('action', None)
+# 				if action == 'ship_to':
+# 					c = CheckoutSessionData(request=request)
+# 					c.use_shipping_method('__free__')
+# 					c.ship_to_user_address(address)
+# 					print '****Address Saved In Session'
+# 					# return redirect('/checkout/preview/')
+# 					return HttpResponse('done')
+
+def address(request):
+	if request.method == 'POST':
+		address_id = request.POST.get('address_id')
+		request.session["checkout_data"]["shipping"]["user_address_id"] = address_id
+		print request.session["checkout_data"]
+		

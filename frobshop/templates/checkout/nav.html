@@ -4,7 +4,7 @@
     <ul class="nav navbar-nav">
         {% spaceless %}
             <li class="step1 {% if step == 1 %}active{% else %}{% if step == 2 %}previous{% else %}{% if step > 1 %}visited{% else %}disabled{% endif %}{% endif %}{% endif %} ">
-                {% if step == 2 or step == 3 %}
+                {% if step == 2 or step == 3 or step == 4 %}
                     <a href="{% url 'checkout:shipping-address' %}">
                         <span class="visible-inline-sm icon-chevron-right"></span>
                         <span>
@@ -20,13 +20,19 @@
 
             <li class="step2 {% if step == 2 %}active{% else %}disabled{% endif %} ">
                 <span class="navbar-text">
-                    {% trans "2. Preview" %}
+                    {% trans "2. Payment" %}
                 </span>
             </li>
 
             <li class="step3 {% if step == 3 %}active{% else %}disabled{% endif %} ">
                 <span class="navbar-text">
-                    {% trans "3. Confirmation" %}
+                    {% trans "3. Preview" %}
+                </span>
+            </li>
+
+            <li class="step4 {% if step == 4 %}active{% else %}disabled{% endif %} ">
+                <span class="navbar-text">
+                    {% trans "4. Confirmation" %}
                 </span>
             </li>
         {% endspaceless %}

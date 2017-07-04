@@ -6,7 +6,7 @@
 {% endblock %}
 
 {% block checkout_nav %}
-    {% include 'checkout/nav.html' with step=4 %}
+    {% include 'checkout/nav.html' with step=3 %}
 {% endblock %}
 
 {% block checkout_title %}
@@ -15,7 +15,7 @@
 
 {% block place_order %}
     <script type="text/javascript" src="{% static 'jquery-3.2.1.js' %}"></script>
-
+    <span id="address"></span>
     {# <form method="post" action="{% url 'checkout:preview' %}" id="place_order_form"> #}
     <form method="post" action="/purchase" id="place_order_form">
         {% csrf_token %}
@@ -41,6 +41,8 @@
         var options;
         var rzp1;
         $( document ).ready(function() {
+            $('#address').load('./shipping_address.html');
+            // console.log(address_id);
             console.log( "ready!" );
             $.ajax({
                 url: '/app/userInfoForOrderPayment/',
