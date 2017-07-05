@@ -3,19 +3,21 @@ from django.http import HttpResponse, JsonResponse, Http404, HttpResponseRedirec
 from django.contrib.auth.models import User
 from django.contrib import messages
 from django.views.decorators.csrf import csrf_exempt
-import requests, json, simplejson
+
+from random import randint
+import requests, json, simplejson, datetime
 
 from oscar.apps.basket.models import Basket
 from oscar.apps.basket import views, signals
-from oscar.apps.basket.views import BasketView, VoucherAddView, VoucherRemoveView
-from oscar.apps.partner.strategy import Selector
+from oscar.apps.basket.views import BasketView, VoucherAddView
 from oscar.apps.voucher.models import Voucher
-from oscar.apps.checkout.views import PaymentDetailsView, ShippingAddressView
-from oscar.apps.checkout.mixins import OrderPlacementMixin
-from oscar.apps.checkout.utils import CheckoutSessionData
+from oscar.apps.offer.models import ConditionalOffer
+from oscar.apps.checkout.views import PaymentDetailsView
+from oscar.apps.address.models import UserAddress
 
 from oscar.core.loading import get_model, get_class
 from oscar.core.utils import redirect_to_referrer
+from oscar.core import prices
 
 import razorpay
 
@@ -23,12 +25,6 @@ from models import *
 
 def index(request):
 	return HttpResponse('Main App')
-
-def email(request):
-	if request.method == 'POST':
-		print request.POST.get('email')
-	else:
-		raise Http404()
 
 def addVoucher(request):
 	if request.method == 'POST':
@@ -39,24 +35,14 @@ def addVoucher(request):
 			userProfile.name = user.first_name + " " + user.last_name
 			userProfile.save()
 		basket = request.basket
-		response = {
-			'status' : '',
-			'message' : '',
-		}
 		print 'code : ', code
 		print 'user : ', user
 		print 'userProfile : ', userProfile
 		print 'request : ', request
 		print 'request.basket : ', request.basket
+		print 'request.session : ', request.session.items()
 
 		if not request.basket.id:
-			return redirect_to_referrer(request, 'basket:summary')
-
-		if 'CODE' in request.session and request.session.get('CODE') == code:
-			messages.error(
-				request,
-				 ("You have already added the '%(code)s' voucher to your basket") % {'code': code})
-
 			return redirect_to_referrer(request, 'basket:summary')
 
 		else:
@@ -161,7 +147,6 @@ def addVoucher(request):
 	else:
 		pass
 		
-
 def apply_voucher_to_basket(request, voucher):
 	if voucher.is_expired():
 		messages.error(request, ("The '%(code)s' voucher has expired") % {'code': voucher.code})
@@ -202,31 +187,6 @@ def apply_voucher_to_basket(request, voucher):
 			("Voucher '%(code)s' added to basket") % {'code': voucher.code})
 	return
 
-
-# url(r'^vouchers/(?P<pk>\d+)/remove/$', remove_voucher_view.as_view(), name='vouchers-remove'),
-def remove_voucher_from_basket(request):
-	if request.method == 'POST':
-		remove_signal = signals.voucher_removal
-		code = request.POST.get('code')
-		try:
-
-			if not request.basket.id:
-				return redirect('/basket/')
-
-			voucher = Voucher.objects.get(code=code)
-			request.basket.vouchers.remove(voucher)
-			remove_signal.send(sender=VoucherRemoveView, basket=request.basket, voucher=voucher)
-			messages.info(request, ("Voucher '%s' removed from basket") % voucher.code)
-
-
-		except Exception as e:
-			messages.error(request, ("No voucher found with code '%(code)s' ") % {'code': code})
-
-		return redirect('/basket/')
-
-	else:
-		pass
-
 def test(request):
 	return render(request, 'razorpay/checkout.html')
 
@@ -236,13 +196,12 @@ def userInfoForOrderPayment(request):
 		user = request.user
 		userProfile, created = UserProfile.objects.get_or_create(user=user)
 		basket = request.basket
+
 		if not request.basket.id:
 			raise Http404('Unauthorised')
-		# amount = simplejson.dumps(basket.total_incl_tax)
+
 		p = PaymentDetailsView()
 		order_number = p.generate_order_number(basket)
-		# request.session['amount'] = amount
-		# request.session['receipt'] = order_number
 		client = razorpay.Client(auth=("rzp_test_35cVWM6ho9fNqF", "1SqPJcVH1FJmJCyT7UavEdhX"))
 		amount = int(basket.total_incl_tax) * 100
 		receipt = str(order_number)
@@ -263,7 +222,8 @@ def userInfoForOrderPayment(request):
 			'order_id': order["id"]
 		}
 		data = json.dumps(data)
-		print request.session["checkout_data"]
+		user_address_id = request.session["checkout_data"]["shipping"]["user_address_id"]
+		print user_address_id
 		return HttpResponse(data)
 
 	else:
@@ -278,69 +238,53 @@ def handle_payment(request):
 		resp = client.payment.fetch(razorpay_payment_id)
 		amount = resp['amount']
 		status = resp['status']
+		# user = request.user
+		# basket = request.basket
+		# user_address_id = request.session["checkout_data"]["shipping"]["user_address_id"]
+		# p = PaymentDetailsView(request=request)
+		# order_number = p.generate_order_number(basket)
+		# print p.build_submission()	
+		# shipping_address = UserAddress.objects.get(id=user_address_id)
+		# billing_address = BillingAddress.objects
+		# billing_address = request.user.addresses.get(is_default_for_billing=True)
+		# CheckoutSessionMixin = get_class('checkout.session', 'CheckoutSessionMixin')
+		# shipping_method_code = request.session["checkout_data"]["shipping"]["method_code"]
 
 		if status == 'authorized':
 			capture = client.payment.capture(razorpay_payment_id, amount)
 			if capture["captured"] == True:
 				print "******Captured Successfully******"
-				p = PaymentDetailsView()
-				order_number = p.generate_order_number(request.basket)
-				user = request.user
-				basket = request.basket
-
-				# place_order = OrderPlacementMixin
-				# .handle_order_placement(order_number, user, basket, shipping_address, shipping_method, shipping_charge, billing_address, order_total)
 
 			capture = json.dumps(capture)
-			# p = PaymentDetailsView()
-			# order_number = p.generate_order_number(request.basket)
-			# receipt = str(order_number)
-			# data = {
-			# 	'amount': amount,
-			# 	'currency':'INR',
-			# 	'receipt':receipt,
-			# 	'notes':{}
-			# }
-			# invoice = client.invoice.create(data=data)
-			# print 'invoice'
-			# print invoice
 			return HttpResponse(capture)
 
 		resp = json.dumps(resp)
 		return HttpResponse(resp)
 
-def testOscarOrder(request):
-	print request
-	basket = request.basket
-	p = PaymentDetailsView()
-	order_number = p.generate_order_number(basket)
-	client = razorpay.Client(auth=("rzp_test_35cVWM6ho9fNqF", "1SqPJcVH1FJmJCyT7UavEdhX"))
-	amount = request.session['amount']*100
-	receipt = request.session['receipt']
-	print amount
-	print receipt
-	client.order.create(amount=amount,currency='INR',receipt=receipt,notes={})
-	return HttpResponse('hi')
+def generateReferral(request):
+	if request.user.is_authenticated():
+		try:
+			print 'Referral Already Made'
+			referral_code = ReferralCode.objects.get(user=request.user)
+			code = r.code
+			return referral_code
 
-# from oscar.apps.shipping.methods import NoShippingRequired
-# def address(request):
-# 	if request.method == 'POST':
-# 		if request.user.is_authenticated():
-# 			if 'address_id' in request.POST:
-# 				UserAddress = get_model('address', 'UserAddress')
-# 				address = UserAddress._default_manager.get(pk=request.POST.get('address_id'), user=request.user)
-# 				action = request.POST.get('action', None)
-# 				if action == 'ship_to':
-# 					c = CheckoutSessionData(request=request)
-# 					c.use_shipping_method('__free__')
-# 					c.ship_to_user_address(address)
-# 					print '****Address Saved In Session'
-# 					# return redirect('/checkout/preview/')
-# 					return HttpResponse('done')
+		except Exception as e:
+			print 'Making a New Referral Code'
+			ran = randint(1000,9999)
+			referral_code = 'R'+request.user.first_name+str(ran)
+			offer = ConditionalOffer.objects.get(name='testing')
+			name = referral_code
+			code = referral_code
+			r = ReferralCode.objects.create(code=code, user=request.user)
+			usage = Voucher.ONCE_PER_CUSTOMER
+			start_datetime = datetime.datetime.now()
+			end_datetime = start_datetime + datetime.timedelta(days=2*365)
+			v = Voucher.objects.create(name=name, code=code, 
+				usage=usage, start_datetime=start_datetime, end_datetime=end_datetime)
+			v.offers.add(offer)
+			v.save()
+			return HttpResponse(referral_code) 
 
-def address(request):
-	if request.method == 'POST':
-		address_id = request.POST.get('address_id')
-		request.session["checkout_data"]["shipping"]["user_address_id"] = address_id
-		print request.session["checkout_data"]
-		
+	else:
+		raise Http404('Unauthorised')

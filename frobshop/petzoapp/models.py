@@ -41,16 +41,16 @@ class PastFoodDog(models.Model):
 class ReferralCode(models.Model):
 	user = models.ForeignKey(User)
 	code = models.CharField(blank=False, max_length=128)
-	discount_giver = models.FloatField(blank=False)
-	discount_taker = models.FloatField(blank=False)
+	discount_giver = models.FloatField(blank=True, default=0)
+	discount_taker = models.FloatField(blank=True, default=0)
 
 	def __unicode__(self):
 		return self.code
 
-# class PromoCode(models.Model):
-# 	code = models.CharField(blank=False, max_length=128)
-# 	# valid = models.DateTimeField(blank=False)
+class Totals(models.Model):
+	currency = models.CharField(max_length=5, blank=False, default='INR')
+	incl_tax = models.DecimalField(max_digits=8, decimal_places=3, default=0)
+	excl_tax = models.DecimalField(max_digits=8, decimal_places=3, default=0)
 
-# 	def __unicode__(self):
-# 		return code
-
+	def __unicode__(self):
+		return self.currency

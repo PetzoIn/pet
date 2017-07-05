@@ -15,17 +15,9 @@
 
 {% block place_order %}
     <script type="text/javascript" src="{% static 'jquery-3.2.1.js' %}"></script>
-    <span id="address"></span>
-    {# <form method="post" action="{% url 'checkout:preview' %}" id="place_order_form"> #}
-    <form method="post" action="/purchase" id="place_order_form">
+    
+    <form method="post" action="/purchase" id="make_payment">
         {% csrf_token %}
-        
-        {% comment %}
-            When submitting sensitive data on the payment details page (eg a bankcard)
-            we don't want to save the data and so we pass the bound form to the preview
-            template and render it in a hidden div.  Then the payment information will
-            get re-submitted when the user confirms the order.
-        {% endcomment %}
 
         <div class="form-group clearfix">
             <div class="row">
@@ -35,14 +27,33 @@
             </div>
         </div>
     </form>
+    
+   <div id="modal" class="modal">
+       <div class="modal-content">
+           <form method="post" action="{% url 'checkout:preview' %}" id="place_order_form">
+                  {% csrf_token %}
+
+                  <input type="hidden" name="action" value="place_order" />
+
+                  <div class="form-group clearfix">
+                      <div class="row">
+                          <div class="col-sm-3 col-sm-offset-9">
+                               <button id='place-order' type="submit" class="btn btn-primary btn-lg btn-block" data-loading-text="{% trans 'Submitting...' %}">{% trans "View Order" %}</button>
+                          </div>
+                      </div>
+                  </div>
+              </form>
+       </div>
+   </div>
+
+
     <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
     <script type="text/javascript">
         var data;
         var options;
         var rzp1;
+        $('#modal').hide();
         $( document ).ready(function() {
-            $('#address').load('./shipping_address.html');
-            // console.log(address_id);
             console.log( "ready!" );
             $.ajax({
                 url: '/app/userInfoForOrderPayment/',
@@ -69,6 +80,10 @@
                                 success: function(response) {
                                     console.log('success');
                                     console.log(response);
+                                    if(response.captured === true){
+                                        $('#make_payment').hide();
+                                        $('#modal').show();
+                                    }
                                 },
                                 error: function(response) {
                                     console.log('Error');
