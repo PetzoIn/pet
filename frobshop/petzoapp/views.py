@@ -272,6 +272,7 @@ from decimal import *
 def refereeCredit(request):
 	if request.method == 'POST':
 		referral = request.session["referral"]
+		referral = json.dumps(referral)
 		referral = json.loads(referral)
 		print referral
 		print referral["referee_id"]
