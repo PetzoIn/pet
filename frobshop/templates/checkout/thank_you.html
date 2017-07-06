@@ -21,6 +21,22 @@
 {% endblock %}
 
 {% block content %}
+    <script type="text/javascript" src="{% static 'jquery-3.2.1.js' %}"></script>
+    <script type="text/javascript">
+        $.ajax({
+            url: '/app/refereeCredit/',
+            type: 'GET',
+            dataType: 'json',
+            success: function(response){
+                console.log('success');
+                console.log(response);
+            },
+            error: function(response){
+                console.log('error');
+                console.log(response);
+            }
+        });
+    </script>
     <p class="lead">
         {% blocktrans with number=order.number %}
         Your order has been placed and a confirmation email has been sent - your order number is
@@ -77,23 +93,10 @@
                 </div>
                 <div class="well well-success">
                     <h3>{% trans "Payment" %}</h3>
-                    {% for source in order.sources.all %}
                         <p>
-                        {% if source.reference %}
-                            {% blocktrans with amount=source.amount_allocated|currency:source.currency type=source.source_type.name reference=source.reference %}
-                                Allocation of {{ amount }} from type {{ type }} (reference: {{ reference }})
-                            {% endblocktrans %}
-                        {% else %}
-                            {% blocktrans with amount=source.amount_allocated|currency:source.currency type=source.source_type.name %}
-                                Allocation of {{ amount }} from type {{ type }}
-                            {% endblocktrans %}
-                        {% endif %}
-                        </p>
-                    {% empty %}
-                        <p>
-                        {% trans "No payment was required for this order." %}
-                        </p>
-                    {% endfor %}
+                        {% blocktrans %}
+                            Payment Successful
+                        {% endblocktrans %}
 
                     {% if order.billing_address %}
                         <h4>{% trans "Billing address" %}</h4>

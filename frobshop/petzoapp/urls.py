@@ -8,5 +8,6 @@ urlpatterns = [
 	url(r'^userInfoForOrderPayment/$', userInfoForOrderPayment, name='userInfoForOrderPayment'),
 	url(r'^handle_payment/$', handle_payment, name='handle_payment'),
 	url(r'^rzp/$', test, name='rzp'),
-	url(r'^generateReferral/$', generateReferral, name='generateReferral'),
+	url(r'^getReferral/$', getReferral, name='getReferral'),
+	url(r'^refereeCredit/$', refereeCredit, name='refereeCredit'),
 ]

@@ -3,6 +3,8 @@ from django.http import HttpResponse, JsonResponse, Http404, HttpResponseRedirec
 from django.contrib.auth.models import User
 from django.contrib import messages
 from django.views.decorators.csrf import csrf_exempt
+from django.utils import timezone
+from django.core import serializers
 
 from random import randint
 import requests, json, simplejson, datetime
@@ -38,7 +40,6 @@ def addVoucher(request):
 		print 'code : ', code
 		print 'user : ', user
 		print 'userProfile : ', userProfile
-		print 'request : ', request
 		print 'request.basket : ', request.basket
 		print 'request.session : ', request.session.items()
 
@@ -46,8 +47,6 @@ def addVoucher(request):
 			return redirect_to_referrer(request, 'basket:summary')
 
 		else:
-
-			# Apply the code to this price
 
 			total_incl_tax_excl_discounts = basket._get_total('line_price_incl_tax')
 
@@ -58,9 +57,19 @@ def addVoucher(request):
 					if userProfile.referral_taken == False:
 						referral_model = ReferralCode.objects.get(code=code)
 						referee = referral_model.user
-						refereeProfile = UserProfile.objects.get_or_create(user=referee)
-						discount_to_be_applied = referral_model.discount_taker * total_incl_tax_excl_discounts
+						if referee == user:
+							messages.error(request, "Chasing your own tail!")
+							return redirect_to_referrer(request, 'basket:summary')
+						print 'its a referral'
+						refereeProfile, created = UserProfile.objects.get_or_create(user=referee)
+						discount_to_be_applied = 0.10 * float(total_incl_tax_excl_discounts)
 						voucher = Voucher.objects.get(code=code)
+						print voucher
+						referral = {
+							"referee" : referee.id ,
+							"discount_to_be_applied" : discount_to_be_applied
+						}
+						request.session['referral'] = json.dumps(referral)
 
 					else:
 						messages.error(request, 'You have already used a General Referral Code')
@@ -76,73 +85,17 @@ def addVoucher(request):
 				
 
 			except Exception as e:
+				print '******'
+				print e
+				print '******'
 				messages.error(request, ("No voucher found with code '%(code)s'") % {'code': code})
 				return redirect_to_referrer(request, 'basket:summary')
 
-			else:
+			# Coupon
+			request.session['CODE'] = code
+			apply_voucher_to_basket(request, voucher)
 
-				# Coupon
-				request.session['CODE'] = code
-				apply_voucher_to_basket(request, voucher)
-
-				return redirect_to_referrer(request, 'basket:summary')
-
-
-		# request.session['voucher_response'] = response
-
-		# return redirect_to_referrer(request, default)
-		# return HttpResponseRedirect('/basket/')
-		# return render(request, 'basket/basket_content.html')
-		# r = requests.post('/basket/', response=response)
-
-		'''
-
-		# Referral
-		if code[0] == 'R':
-			if userProfile.referral_taken == False:
-				try:
-					referral_model = ReferralCode.objects.get(code=code)
-					discount = referral_model.discount_giver
-					
-					# Fetch the Undiscounted Price
-					basket = Basket()
-					try:
-						strategy = basket._get_strategy()
-
-						
-					except Exception as e:
-						raise e
-					# Apply this to price
-					# discountedValue = x
-
-
-
-					refree = referral_model.user
-					refreeProfile = UserProfile.objects.get(user=refree)
-					refreeProfile.no_of_referred_users += 1
-					refreeProfile.user_credit += discountedValue
-
-					userProfile.referral_taken = True
-
-					response['status'] = 'Success'
-					response['message'] = 'Successfully Applied'
-
-				except Exception as e:
-					response['status'] = 'Success'
-					response['message'] = 'Invalid Code'
-					# raise e
-
-				return render(request, 'basket/basket.html', data=response)
-				
-		# Vet
-		elif code[0] == 'V':
-			pass
-
-		# Coupon
-		else:
-			pass
-
-		'''
+			return redirect_to_referrer(request, 'basket:summary')
 
 	else:
 		pass
@@ -261,30 +214,78 @@ def handle_payment(request):
 		resp = json.dumps(resp)
 		return HttpResponse(resp)
 
-def generateReferral(request):
+def getReferral(request):
 	if request.user.is_authenticated():
+		data = {
+			'message':'',
+			'referral_code':''
+		}
 		try:
-			print 'Referral Already Made'
+			data["message"] = 'Referral Already Made'
+			print data["message"]
 			referral_code = ReferralCode.objects.get(user=request.user)
-			code = r.code
-			return referral_code
+			code = referral_code.code
+			data["referral_code"] = code
+			data = json.dumps(data)
+			return HttpResponse(data)
 
 		except Exception as e:
-			print 'Making a New Referral Code'
-			ran = randint(1000,9999)
-			referral_code = 'R'+request.user.first_name+str(ran)
+			data["message"] = 'Making a New Referral Code'
+			print data["message"]
+			generated = False
+			while generated != True:
+				ran = randint(1000,9999)
+				referral_code = 'R'+request.user.first_name+str(ran)
+				if ReferralCode.objects.filter(code=referral_code).exists():
+					continue
+				else:
+					generated = True
+
 			offer = ConditionalOffer.objects.get(name='testing')
-			name = referral_code
-			code = referral_code
-			r = ReferralCode.objects.create(code=code, user=request.user)
+			name = referral_code.upper()
+			code = referral_code.upper()
+			print type(code)
+			r = ReferralCode()
+			r.code = code
+			r.user = request.user
+			r.discount_giver = 0.10
+			r.discount_taker = 0.10
+			r.save()
+			data["referral_code"] = code
 			usage = Voucher.ONCE_PER_CUSTOMER
-			start_datetime = datetime.datetime.now()
+			start_datetime = timezone.now()
 			end_datetime = start_datetime + datetime.timedelta(days=2*365)
 			v = Voucher.objects.create(name=name, code=code, 
 				usage=usage, start_datetime=start_datetime, end_datetime=end_datetime)
 			v.offers.add(offer)
 			v.save()
-			return HttpResponse(referral_code) 
+			data = json.dumps(data)
+			return HttpResponse(data)
+
+	else:
+		raise Http404('Unauthorised')
+
+@csrf_exempt
+def refereeCredit(request):
+	if request.method == 'POST':
+		# refereeProfile = request.session["refereeProfile"]
+		# discount_to_be_applied = request.session["discount_to_be_applied"]
+		# data = {
+		# 	'status':''
+		# }
+		# try:
+		# 	UserProfile.referral_taken = True
+		# 	refereeProfile.user_credit += discount_to_be_applied
+		# 	refereeProfile.no_of_referred_users += 1
+		# 	data['status'] = 'success'
+		# 	return HttpResponse(data)
+
+		# except Exception as e:
+		# 	print e
+		# 	data['status'] = 'fail'
+		# 	return HttpResponse(e)
+		referral = request.session["referral"]
+		return HttpResponse(json.dumps(referral))
 
 	else:
 		raise Http404('Unauthorised')

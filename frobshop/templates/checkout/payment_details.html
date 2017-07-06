@@ -18,7 +18,8 @@
 
 {% block payment_details %}
     {% block payment_details_content %}
-        <a id="view_preview" href="{% url 'checkout:preview' %}" class="btn btn-primary btn-lg">
-        {% trans "Continue" %}</a>
+    	<script type="text/javascript">
+    		window.setTimeout(function(){window.location="http://localhost:8000/checkout/preview/"} , 3000);
+    	</script>
     {% endblock payment_details_content %}
 {% endblock payment_details %}

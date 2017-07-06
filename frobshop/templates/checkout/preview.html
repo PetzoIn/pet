@@ -22,7 +22,7 @@
         <div class="form-group clearfix">
             <div class="row">
                 <div class="col-sm-3 col-sm-offset-9">
-                     <button id='place-order' type="submit" class="btn btn-primary btn-lg btn-block razorpay-payment-button" data-loading-text="{% trans 'Submitting...' %}">{% trans "Pay Now" %}</button>
+                     <button id='pay-now' type="submit" class="btn btn-primary btn-lg btn-block razorpay-payment-button" data-loading-text="{% trans 'Submitting...' %}">{% trans "Pay Now" %}</button>
                 </div>
             </div>
         </div>
@@ -38,7 +38,7 @@
                   <div class="form-group clearfix">
                       <div class="row">
                           <div class="col-sm-3 col-sm-offset-9">
-                               <button id='place-order' type="submit" class="btn btn-primary btn-lg btn-block" data-loading-text="{% trans 'Submitting...' %}">{% trans "View Order" %}</button>
+                               <button id='place-order' type="submit" class="btn btn-primary btn-lg btn-block" data-loading-text="{% trans 'Submitting...' %}">{% trans "Place Order" %}</button>
                           </div>
                       </div>
                   </div>
@@ -71,14 +71,13 @@
                         "description": "Purchase Description",
                         "image": "{% static 'images/petzo.png' %}",
                         "handler": function (response){
-                            // console.log(response);
                             $.ajax({
                                 url: '/app/handle_payment/',
                                 type: 'POST',
                                 dataType: 'json',
                                 data: {razorpay_payment_id: response.razorpay_payment_id},
                                 success: function(response) {
-                                    console.log('success');
+                                    console.log('successfully captured');
                                     console.log(response);
                                     if(response.captured === true){
                                         $('#make_payment').hide();
@@ -112,7 +111,7 @@
                     console.log(response);
                 }
             });
-            document.getElementById('place-order').onclick = function(e){
+            document.getElementById('pay-now').onclick = function(e){
                 rzp1.open();
                 e.preventDefault();
             }
