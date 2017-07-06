@@ -61,15 +61,15 @@ def addVoucher(request):
 							messages.error(request, "Chasing your own tail!")
 							return redirect_to_referrer(request, 'basket:summary')
 						print 'its a referral'
-						refereeProfile, created = UserProfile.objects.get_or_create(user=referee)
 						discount_to_be_applied = 0.10 * float(total_incl_tax_excl_discounts)
 						voucher = Voucher.objects.get(code=code)
 						print voucher
 						referral = {
-							"referee" : referee.id ,
+							"referee_id" : referee.id ,
 							"discount_to_be_applied" : discount_to_be_applied
 						}
-						request.session['referral'] = json.dumps(referral)
+						request.session['referral'] = referral
+						print request.session['referral']
 
 					else:
 						messages.error(request, 'You have already used a General Referral Code')
@@ -175,8 +175,9 @@ def userInfoForOrderPayment(request):
 			'order_id': order["id"]
 		}
 		data = json.dumps(data)
-		user_address_id = request.session["checkout_data"]["shipping"]["user_address_id"]
-		print user_address_id
+		# print request.session["checkout_data"].items()
+		# user_address_id = request.session["checkout_data"]["shipping"]["user_address_id"]
+		# print user_address_id
 		return HttpResponse(data)
 
 	else:
@@ -265,27 +266,34 @@ def getReferral(request):
 	else:
 		raise Http404('Unauthorised')
 
+from decimal import *
+
 @csrf_exempt
 def refereeCredit(request):
 	if request.method == 'POST':
-		# refereeProfile = request.session["refereeProfile"]
-		# discount_to_be_applied = request.session["discount_to_be_applied"]
-		# data = {
-		# 	'status':''
-		# }
-		# try:
-		# 	UserProfile.referral_taken = True
-		# 	refereeProfile.user_credit += discount_to_be_applied
-		# 	refereeProfile.no_of_referred_users += 1
-		# 	data['status'] = 'success'
-		# 	return HttpResponse(data)
-
-		# except Exception as e:
-		# 	print e
-		# 	data['status'] = 'fail'
-		# 	return HttpResponse(e)
 		referral = request.session["referral"]
-		return HttpResponse(json.dumps(referral))
+		referral = json.loads(referral)
+		print referral
+		print referral["referee_id"]
+		referee = User.objects.get(id=referral["referee_id"])
+		refereeProfile, created = UserProfile.objects.get_or_create(user=referee)
+		discount_to_be_applied = referral["discount_to_be_applied"]
+		data = {
+			'status':''
+		}
+		try:
+			refereeProfile.referral_taken = True
+			refereeProfile.user_credit += Decimal(discount_to_be_applied)
+			refereeProfile.no_of_referred_users += 1
+			refereeProfile.save()
+			data['status'] = 'success'
+			data = json.dumps(data)
+			return HttpResponse(data)
+
+		except Exception as e:
+			print e
+			data['status'] = 'fail'
+			return HttpResponse(e)
 
 	else:
 		raise Http404('Unauthorised')

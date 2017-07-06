@@ -46,11 +46,3 @@ class ReferralCode(models.Model):
 
 	def __unicode__(self):
 		return self.code
-
-class Totals(models.Model):
-	currency = models.CharField(max_length=5, blank=False, default='INR')
-	incl_tax = models.DecimalField(max_digits=8, decimal_places=3, default=0)
-	excl_tax = models.DecimalField(max_digits=8, decimal_places=3, default=0)
-
-	def __unicode__(self):
-		return self.currency
