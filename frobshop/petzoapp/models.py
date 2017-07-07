@@ -41,8 +41,6 @@ class PastFoodDog(models.Model):
 class ReferralCode(models.Model):
 	user = models.ForeignKey(User)
 	code = models.CharField(blank=False, max_length=128, unique=True)
-	discount_giver = models.FloatField(blank=True, default=0)
-	discount_taker = models.FloatField(blank=True, default=0)
 
 	def __unicode__(self):
 		return self.code
