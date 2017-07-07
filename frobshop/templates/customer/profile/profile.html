@@ -14,6 +14,7 @@
                 console.log('success');
                 console.log(response);
                 document.getElementById('referral_code').innerText = response.referral_code;
+                document.getElementById('user_credit').innerText = response.user_credit;
             },
             error: function(response){
                 console.log('error');
@@ -47,6 +48,10 @@
             <tr>
                 <th>{% trans 'Referral Code' %}</th>
                 <td id="referral_code"></td>
+            </tr>
+            <tr>
+                <th>{% trans 'Petzo Credit' %}</th>
+                <td id="user_credit"></td>
             </tr>
         </tbody>
     </table>

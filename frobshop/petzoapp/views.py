@@ -7,11 +7,12 @@ from django.utils import timezone
 from django.core import serializers
 
 from random import randint
+from decimal import Decimal
 import requests, json, simplejson, datetime
 
 from oscar.apps.basket.models import Basket
 from oscar.apps.basket import views, signals
-from oscar.apps.basket.views import BasketView, VoucherAddView
+from oscar.apps.basket.views import BasketView, VoucherAddView, VoucherRemoveView
 from oscar.apps.voucher.models import Voucher
 from oscar.apps.offer.models import ConditionalOffer
 from oscar.apps.checkout.views import PaymentDetailsView
@@ -65,6 +66,7 @@ def addVoucher(request):
 						voucher = Voucher.objects.get(code=code)
 						print voucher
 						referral = {
+							"user_id" : request.user.id,
 							"referee_id" : referee.id ,
 							"discount_to_be_applied" : discount_to_be_applied
 						}
@@ -78,6 +80,14 @@ def addVoucher(request):
 				# Vet
 				elif code[0] == 'V':
 					pass
+
+				# CREDIT
+				elif 'CREDIT' in code:
+					credit = {
+						"user_id" : request.user.id,
+						# "credit_used" : credit value
+					}
+					request.session['credit'] = credit
 
 				# Coupon
 				else:
@@ -132,13 +142,41 @@ def apply_voucher_to_basket(request, voucher):
 			break
 
 	if not found_discount:
-		messages.warning(request,
-			("Your basket does not qualify for a voucher discount"))
+		messages.warning(request,("Your basket does not qualify for a voucher discount"))
 		request.basket.vouchers.remove(voucher)
+
 	else:
-		messages.info(request,
-			("Voucher '%(code)s' added to basket") % {'code': voucher.code})
+		messages.info(request, ("Voucher added to basket"))
+
+	# voucher_id = request.basket.vouchers.all()[0].id
+	# request.session["voucher_id"] = voucher_id
+
 	return
+
+def remove_voucher_from_basket(request, *args, **kwargs):
+	if request.method == 'POST':
+		response = redirect('basket:summary')
+		voucher_id = kwargs["pk"]
+		remove_signal = signals.voucher_removal
+
+		if not request.basket.id:
+			return response
+
+		try:
+			voucher = request.basket.vouchers.get(id=voucher_id)
+
+		except ObjectDoesNotExist:
+			 messages.error(request, ("No voucher found with id '%d'") % voucher_id)
+
+		else:
+			request.basket.vouchers.remove(voucher)
+			remove_signal.send(sender=VoucherRemoveView, basket=request.basket, voucher=voucher)
+			messages.info(request, ("Voucher removed from basket"))
+
+		return response
+
+	else:
+		raise Http404('Unauthorised')
 
 def test(request):
 	return render(request, 'razorpay/checkout.html')
@@ -175,9 +213,6 @@ def userInfoForOrderPayment(request):
 			'order_id': order["id"]
 		}
 		data = json.dumps(data)
-		# print request.session["checkout_data"].items()
-		# user_address_id = request.session["checkout_data"]["shipping"]["user_address_id"]
-		# print user_address_id
 		return HttpResponse(data)
 
 	else:
@@ -192,18 +227,6 @@ def handle_payment(request):
 		resp = client.payment.fetch(razorpay_payment_id)
 		amount = resp['amount']
 		status = resp['status']
-		# user = request.user
-		# basket = request.basket
-		# user_address_id = request.session["checkout_data"]["shipping"]["user_address_id"]
-		# p = PaymentDetailsView(request=request)
-		# order_number = p.generate_order_number(basket)
-		# print p.build_submission()	
-		# shipping_address = UserAddress.objects.get(id=user_address_id)
-		# billing_address = BillingAddress.objects
-		# billing_address = request.user.addresses.get(is_default_for_billing=True)
-		# CheckoutSessionMixin = get_class('checkout.session', 'CheckoutSessionMixin')
-		# shipping_method_code = request.session["checkout_data"]["shipping"]["method_code"]
-
 		if status == 'authorized':
 			capture = client.payment.capture(razorpay_payment_id, amount)
 			if capture["captured"] == True:
@@ -219,7 +242,8 @@ def getReferral(request):
 	if request.user.is_authenticated():
 		data = {
 			'message':'',
-			'referral_code':''
+			'referral_code':'',
+			'user_credit':''
 		}
 		try:
 			data["message"] = 'Referral Already Made'
@@ -227,6 +251,9 @@ def getReferral(request):
 			referral_code = ReferralCode.objects.get(user=request.user)
 			code = referral_code.code
 			data["referral_code"] = code
+			userProfile = UserProfile.objects.get(user=request.user)
+			user_credit = userProfile.user_credit
+			data["user_credit"] = str(user_credit)
 			data = json.dumps(data)
 			return HttpResponse(data)
 
@@ -249,10 +276,11 @@ def getReferral(request):
 			r = ReferralCode()
 			r.code = code
 			r.user = request.user
-			r.discount_giver = 0.10
-			r.discount_taker = 0.10
 			r.save()
 			data["referral_code"] = code
+			userProfile = UserProfile.objects.get(user=request.user)
+			user_credit = userProfile.user_credit
+			data["user_credit"] = str(user_credit)
 			usage = Voucher.ONCE_PER_CUSTOMER
 			start_datetime = timezone.now()
 			end_datetime = start_datetime + datetime.timedelta(days=2*365)
@@ -266,35 +294,44 @@ def getReferral(request):
 	else:
 		raise Http404('Unauthorised')
 
-from decimal import *
-
 @csrf_exempt
 def refereeCredit(request):
 	if request.method == 'POST':
-		referral = request.session["referral"]
-		referral = json.dumps(referral)
-		referral = json.loads(referral)
-		print referral
-		print referral["referee_id"]
-		referee = User.objects.get(id=referral["referee_id"])
-		refereeProfile, created = UserProfile.objects.get_or_create(user=referee)
-		discount_to_be_applied = referral["discount_to_be_applied"]
-		data = {
-			'status':''
-		}
-		try:
-			refereeProfile.referral_taken = True
-			refereeProfile.user_credit += Decimal(discount_to_be_applied)
-			refereeProfile.no_of_referred_users += 1
-			refereeProfile.save()
-			data['status'] = 'success'
+		if 'referral' in request.session:
+			referral = request.session["referral"]
+			referral = json.dumps(referral)
+			referral = json.loads(referral)
+			print referral
+			print referral["referee_id"]
+			referee = User.objects.get(id=referral["referee_id"])
+			refereeProfile, created = UserProfile.objects.get_or_create(user=referee)
+			discount_to_be_applied = referral["discount_to_be_applied"]
+			data = {
+				'status':''
+			}
+			try:
+				refereeProfile.user_credit += Decimal(discount_to_be_applied)
+				refereeProfile.no_of_referred_users += 1
+				refereeProfile.save()
+				userProfile = UserProfile.objects.get(id=referral["user_id"])
+				userProfile.referral_taken = True
+				userProfile.save()
+				data['status'] = 'success'
+				data = json.dumps(data)
+				return HttpResponse(data)
+
+			except Exception as e:
+				print e
+				data['status'] = 'fail'
+				return HttpResponse(e)
+
+		elif 'credit' in request.session:
+			pass
+
+		else:
+			data = {}
 			data = json.dumps(data)
 			return HttpResponse(data)
-
-		except Exception as e:
-			print e
-			data['status'] = 'fail'
-			return HttpResponse(e)
 
 	else:
 		raise Http404('Unauthorised')
