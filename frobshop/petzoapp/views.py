@@ -50,6 +50,7 @@ def addVoucher(request):
 		else:
 
 			total_incl_tax_excl_discounts = basket._get_total('line_price_incl_tax')
+			print 'total : ', total_incl_tax_excl_discounts
 
 			try:
 				
@@ -70,6 +71,7 @@ def addVoucher(request):
 							"referee_id" : referee.id ,
 							"discount_to_be_applied" : discount_to_be_applied
 						}
+						referral = json.dumps(referral)
 						request.session['referral'] = referral
 						print request.session['referral']
 
@@ -80,14 +82,6 @@ def addVoucher(request):
 				# Vet
 				elif code[0] == 'V':
 					pass
-
-				# CREDIT
-				elif 'CREDIT' in code:
-					credit = {
-						"user_id" : request.user.id,
-						# "credit_used" : credit value
-					}
-					request.session['credit'] = credit
 
 				# Coupon
 				else:
@@ -105,10 +99,54 @@ def addVoucher(request):
 			request.session['CODE'] = code
 			apply_voucher_to_basket(request, voucher)
 
-			return redirect_to_referrer(request, 'basket:summary')
+	elif request.method == 'GET':
+		if request.user.is_authenticated():
+			# code = request.GET.get('code')
+			user = request.user
+			userProfile, created = UserProfile.objects.get_or_create(user=user)
+			if created:
+				userProfile.name = user.first_name + " " + user.last_name
+				userProfile.save()
+			basket = request.basket
 
-	else:
-		pass
+			if not request.basket.id:
+				return redirect_to_referrer(request, 'basket:summary')
+
+			else:
+				total_incl_tax_excl_discounts = basket._get_total('line_price_incl_tax')
+				
+				# CREDIT
+				userCredit = userProfile.user_credit
+				if userCredit == 0:
+					messages.error(request, "Sorry but you don't have any Petzo Credit!\nRefer to other users using your Referral Code to obtain credit")
+					return redirect_to_referrer(request, 'basket:summary')
+
+				discountable = 0.10 * float(total_incl_tax_excl_discounts)
+				conditionalOffer = ConditionalOffer.objects.get(name='CREDIT')
+				benefit = conditionalOffer.benefit
+
+				if userCredit <= discountable:
+					discount_to_be_applied = userCredit
+					benefit.value = Decimal(userCredit)
+
+				else:
+					discount_to_be_applied = discountable
+					benefit.value = Decimal(discountable)
+
+				conditionalOffer.save()
+
+				credit = {
+					"user_id" : request.user.id,
+					"credit_used" : discount_to_be_applied
+				}
+				credit = json.dumps(credit)
+				request.session['credit'] = credit
+				voucher = Voucher.objects.get(name='CREDIT')
+				print 'voucher : ', voucher
+				apply_voucher_to_basket(request, voucher)
+
+
+	return redirect_to_referrer(request, 'basket:summary')
 		
 def apply_voucher_to_basket(request, voucher):
 	if voucher.is_expired():
@@ -126,11 +164,13 @@ def apply_voucher_to_basket(request, voucher):
 		return
 
 	request.basket.vouchers.add(voucher)
+	print '167 : ', request.basket.vouchers.add(voucher)
 	add_signal = signals.voucher_addition
 	add_signal.send(sender=VoucherAddView, basket=request.basket, voucher=voucher)
 	
 	Applicator = get_class('offer.utils', 'Applicator')
-
+	print 'request.basket : ', request.basket
+	print 'voucher.benefit : ', voucher.benefit
 	Applicator().apply(request.basket, request.user, request)
 	discounts_after = request.basket.offer_applications
 	
@@ -278,7 +318,7 @@ def getReferral(request):
 			r.user = request.user
 			r.save()
 			data["referral_code"] = code
-			userProfile = UserProfile.objects.get(user=request.user)
+			userProfile, create = UserProfile.objects.get_or_create(user=request.user)
 			user_credit = userProfile.user_credit
 			data["user_credit"] = str(user_credit)
 			usage = Voucher.ONCE_PER_CUSTOMER
@@ -299,7 +339,6 @@ def refereeCredit(request):
 	if request.method == 'POST':
 		if 'referral' in request.session:
 			referral = request.session["referral"]
-			referral = json.dumps(referral)
 			referral = json.loads(referral)
 			print referral
 			print referral["referee_id"]

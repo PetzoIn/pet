@@ -181,6 +181,7 @@ OSCAR_SHOP_NAME = 'Petzo'
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'    
 
 MEDIA_ROOT = os.path.join(BASE_DIR,'media/images/products')
+MEDIA_URL = '/media/'
 
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_HOST_USER = 'siddharth.game@gmail.com'
@@ -235,3 +236,5 @@ ACCOUNT_EMAIL_REQUIRED=True
 ACCOUNT_USERNAME_REQURIED=True
 
 LOGIN_REDIRECT_URL = "/"
+
+OSCAR_MISSING_IMAGE_URL = MEDIA_ROOT + '/image_not_found.jpg'
