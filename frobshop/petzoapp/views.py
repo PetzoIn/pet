@@ -269,7 +269,7 @@ def getReferral(request):
 				else:
 					generated = True
 
-			offer = ConditionalOffer.objects.get(name='testing')
+			offer = ConditionalOffer.objects.get(name='REFERRAL')
 			name = referral_code.upper()
 			code = referral_code.upper()
 			print type(code)
