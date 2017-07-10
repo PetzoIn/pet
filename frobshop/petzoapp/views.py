@@ -14,7 +14,7 @@ from oscar.apps.basket.models import Basket
 from oscar.apps.basket import views, signals
 from oscar.apps.basket.views import BasketView, VoucherAddView, VoucherRemoveView
 from oscar.apps.voucher.models import Voucher
-from oscar.apps.offer.models import ConditionalOffer
+from oscar.apps.offer.models import ConditionalOffer, Benefit
 from oscar.apps.checkout.views import PaymentDetailsView
 from oscar.apps.address.models import UserAddress
 
@@ -122,18 +122,21 @@ def addVoucher(request):
 					return redirect_to_referrer(request, 'basket:summary')
 
 				discountable = 0.10 * float(total_incl_tax_excl_discounts)
-				conditionalOffer = ConditionalOffer.objects.get(name='CREDIT')
-				benefit = conditionalOffer.benefit
+				benefit = Benefit.objects.all()[0]
+
+				print 'userCredit : ', userCredit
+				print 'discountable : ', discountable
 
 				if userCredit <= discountable:
-					discount_to_be_applied = userCredit
-					benefit.value = Decimal(userCredit)
+					discount_to_be_applied = float(userCredit)
+					benefit.value = userCredit
 
 				else:
 					discount_to_be_applied = discountable
 					benefit.value = Decimal(discountable)
 
-				conditionalOffer.save()
+				print 'benefit.value : ', benefit.value
+				benefit.save()
 
 				credit = {
 					"user_id" : request.user.id,
@@ -164,13 +167,10 @@ def apply_voucher_to_basket(request, voucher):
 		return
 
 	request.basket.vouchers.add(voucher)
-	print '167 : ', request.basket.vouchers.add(voucher)
 	add_signal = signals.voucher_addition
 	add_signal.send(sender=VoucherAddView, basket=request.basket, voucher=voucher)
 	
 	Applicator = get_class('offer.utils', 'Applicator')
-	print 'request.basket : ', request.basket
-	print 'voucher.benefit : ', voucher.benefit
 	Applicator().apply(request.basket, request.user, request)
 	discounts_after = request.basket.offer_applications
 	
@@ -337,17 +337,19 @@ def getReferral(request):
 @csrf_exempt
 def refereeCredit(request):
 	if request.method == 'POST':
+		data = {
+			'status':''
+		}
 		if 'referral' in request.session:
 			referral = request.session["referral"]
 			referral = json.loads(referral)
 			print referral
 			print referral["referee_id"]
 			referee = User.objects.get(id=referral["referee_id"])
+			print 'referee : ', referee
 			refereeProfile, created = UserProfile.objects.get_or_create(user=referee)
+			print 'refereeProfile : ', refereeProfile
 			discount_to_be_applied = referral["discount_to_be_applied"]
-			data = {
-				'status':''
-			}
 			try:
 				refereeProfile.user_credit += Decimal(discount_to_be_applied)
 				refereeProfile.no_of_referred_users += 1
@@ -365,10 +367,18 @@ def refereeCredit(request):
 				return HttpResponse(e)
 
 		elif 'credit' in request.session:
-			pass
+			credit = request.session["credit"]
+			credit = json.loads(credit)
+			user = User.objects.get(id=credit["user_id"])
+			userProfile, created = UserProfile.objects.get_or_create(user=user)
+			userProfile.user_credit -= Decimal(credit["credit_used"])
+			userProfile.save()
+			data['status'] = 'success'
+			data = json.dumps(data)
+			return HttpResponse(data)
 
 		else:
-			data = {}
+			data['status'] = 'success'
 			data = json.dumps(data)
 			return HttpResponse(data)
 
