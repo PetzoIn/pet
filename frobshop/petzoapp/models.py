@@ -22,11 +22,36 @@ class Dog(models.Model):
 	breed = models.TextField(blank=False)
 	age = models.CharField(blank=False, max_length=10)
 	gender = models.CharField(blank=False, max_length=6)
+	neutered = models.BooleanField(default=False)
+	pregnant = models.BooleanField(default=False)
+	pregMonths = models.IntegerField(default=0)
+	lactation = models.BooleanField(default=False)
+	number_of_puppies = models.IntegerField(default=0)
 	weight = models.IntegerField(blank=False)
 	bodyCondition = models.CharField(blank=False, max_length=128)
 	activity = models.CharField(blank=False, max_length=128)
 	pastfood = models.CharField(blank=True, max_length=128)
-	image = models.ImageField(upload_to='media/cache', default='static/images/dogDefault.png')
+	calories = models.DecimalField(max_digits=8, decimal_places=3, default=0)
+
+	def __unicode__(self):
+		return str(self.id)
+
+class Cat(models.Model):
+	owner = models.ForeignKey(User)
+	name = models.CharField(blank=False, max_length=128)
+	breed = models.TextField(blank=False)
+	age = models.CharField(blank=False, max_length=10)
+	gender = models.CharField(blank=False, max_length=6)
+	neutered = models.BooleanField(default=False)
+	pregnant = models.BooleanField(default=False)
+	pregMonths = models.IntegerField(default=0)
+	lactation = models.BooleanField(default=False)
+	number_of_puppies = models.IntegerField(default=0)
+	weight = models.IntegerField(blank=False)
+	bodyCondition = models.CharField(blank=False, max_length=128)
+	activity = models.CharField(blank=False, max_length=128)
+	pastfood = models.CharField(blank=True, max_length=128)
+	calories = models.DecimalField(max_digits=8, decimal_places=3, default=0)
 
 	def __unicode__(self):
 		return str(self.id)
