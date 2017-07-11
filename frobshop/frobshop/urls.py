@@ -24,6 +24,5 @@ urlpatterns = [
 	url(r'^i18n/', include('django.conf.urls.i18n')),
 	url(r'', include(application.urls)),
     url(r'^app/', include('petzoapp.urls')),
-    url(r'^blog/', include('petzoblog.urls')),
     url(r'^auth/', include('allauth.urls')),
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

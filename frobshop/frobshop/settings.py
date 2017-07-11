@@ -44,7 +44,6 @@ INSTALLED_APPS = [
     'compressor',
     'widget_tweaks',
     'petzoapp',
-    'petzoblog',
     'allauth',
     'allauth.account',
     'allauth.socialaccount',
