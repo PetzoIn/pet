@@ -81,7 +81,12 @@ def addVoucher(request):
 
 				# Vet
 				elif code[0] == 'V':
-					pass
+					if userProfile.referral_taken == False:
+						pass
+
+					else:
+						messages.error(request, "You have already used a Referral Code! Can't use a Vet's Referral Code Now")
+						return redirect_to_referrer(request, 'basket:summary')
 
 				# Coupon
 				else:
@@ -221,7 +226,7 @@ def remove_voucher_from_basket(request, *args, **kwargs):
 def test(request):
 	return render(request, 'razorpay/checkout.html')
 
-@csrf_exempt
+# @csrf_exempt
 def userInfoForOrderPayment(request):
 	if request.method == 'POST':
 		user = request.user
@@ -252,13 +257,30 @@ def userInfoForOrderPayment(request):
 			'receipt': order_number,
 			'order_id': order["id"]
 		}
+		shippingAddress = request.session['checkout_data']['shipping']
+		# print 'shippingAddress***********', shippingAddress
+
+		if 'new_address_fields' in shippingAddress:
+			phone = shippingAddress['new_address_fields']['phone_number'].replace(' ','')
+			# print phone
+		else:
+			user_address_id = shippingAddress['user_address_id']
+			# print 'user_address_id : ', user_address_id
+			userAdd = UserAddress.objects.get(id=user_address_id)
+			phone = '+' + str(userAdd.phone_number.country_code) + str(userAdd.phone_number.national_number).replace(' ', '')
+			# print phone
+
+		if not data['phone']:
+			# print '****269****'
+			data['phone'] = phone
+
 		data = json.dumps(data)
 		return HttpResponse(data)
 
 	else:
 		raise Http404('Unauthorised')
 
-@csrf_exempt
+# @csrf_exempt
 def handle_payment(request):
 	if request.method == 'POST':
 		client = razorpay.Client(auth=("rzp_test_35cVWM6ho9fNqF", "1SqPJcVH1FJmJCyT7UavEdhX"))
