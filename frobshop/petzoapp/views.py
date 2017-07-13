@@ -356,7 +356,7 @@ def getReferral(request):
 	else:
 		raise Http404('Unauthorised')
 
-@csrf_exempt
+# @csrf_exempt
 def refereeCredit(request):
 	if request.method == 'POST':
 		data = {
@@ -403,6 +403,116 @@ def refereeCredit(request):
 			data['status'] = 'success'
 			data = json.dumps(data)
 			return HttpResponse(data)
+
+	else:
+		raise Http404('Unauthorised')
+
+def dashboard(request, uId):
+	if request.user.is_authenticated():
+		user = request.user
+		u = User.objects.get(id=uId)
+		if user != u:
+			raise Http404('Unauthorised')
+
+		data = {
+			'status' : '',
+			'message' : '',
+			'user' : user,
+			'pets' : []
+		}
+		try:
+			user_dogs = Dog.objects.filter(owner=user)
+			user_cats = Cat.objects.filter(owner=user)
+			data['status'] = 'success'
+
+			for i in user_cats:
+				data['pets'].append(i)
+
+			for i in user_dogs:
+				data['pets'].append(i)
+
+			data['message'] = len(user_dogs) + len(user_cats)
+			return render(request, 'petzoapp/userDashboard.html', data)
+
+		except Exception as e:
+			print e
+			data['status'] = 'fail'
+			data['message'] = e
+			return render(request, 'petzoapp/userDashboard.html', data)
+
+	else:
+		raise Http404("Unauthorised")
+
+def editPetInfo(request, uId, pet, petId):
+	if request.user.is_authenticated():
+		user = request.user
+		u = User.objects.get(id=uId)
+		if user != u:
+			raise Http404('Unauthorised')
+
+		data = {
+			'status' : '',
+			'message' : '',
+			'uId' : uId,
+			'pet' : '',
+		}
+
+		try:
+			if pet == 'dog':
+				dog = Dog.objects.get(id=petId)
+				data['status'] = 'success'
+				data['pet'] = dog
+				return render(request, 'petzoapp/editPetInfo.html', data)
+
+			else:
+				cat = Cat.objects.get(id=petId)
+				data['status'] = 'success'
+				data['pet'] = cat
+				return render(request, 'petzoapp/editPetInfo.html', data)
+
+		except Exception as e:
+			print e
+			data['status'] = 'fail'
+			data['message'] = e
+			return render(request, 'petzoapp/editPetInfo.html', data)
+
+	else:
+		raise Http404('Unauthorised')
+
+def updatePet(request, uId, pet, petId):
+	if request.user.is_authenticated():
+		user = request.user
+		u = User.objects.get(id=uId)
+		if user != u:
+			raise Http404('Unauthorised')
+
+		data = {
+			'status' : '',
+			'message' : '',
+			'uId' : uId,
+			'pet' : '',
+		}
+
+		try:
+			if pet == 'dog':
+				dog = Dog.objects.get(id=petId)
+				# UPDATE DOG
+				data['status'] = 'success'
+				data['pet'] = dog
+				return render(request, 'petzoapp/editPetInfo.html', data)
+
+			else:
+				cat = Cat.objects.get(id=petId)
+				# UPDATE CAT
+				data['status'] = 'success'
+				data['pet'] = cat
+				return render(request, 'petzoapp/editPetInfo.html', data)
+
+		except Exception as e:
+			print e
+			data['status'] = 'fail'
+			data['message'] = e
+			return render(request, 'petzoapp/editPetInfo.html', data)
 
 	else:
 		raise Http404('Unauthorised')

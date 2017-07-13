@@ -19,6 +19,7 @@ class UserProfile(models.Model):
 class Dog(models.Model):
 	owner = models.ForeignKey(User)
 	name = models.CharField(blank=False, max_length=128)
+	pet = models.CharField(blank=False, max_length=3)
 	breed = models.TextField(blank=False)
 	age = models.CharField(blank=False, max_length=10)
 	gender = models.CharField(blank=False, max_length=6)
@@ -34,11 +35,12 @@ class Dog(models.Model):
 	calories = models.DecimalField(max_digits=8, decimal_places=3, default=0)
 
 	def __unicode__(self):
-		return str(self.id)
+		return str(self.name)
 
 class Cat(models.Model):
 	owner = models.ForeignKey(User)
 	name = models.CharField(blank=False, max_length=128)
+	pet = models.CharField(blank=False, max_length=3)
 	breed = models.TextField(blank=False)
 	age = models.CharField(blank=False, max_length=10)
 	gender = models.CharField(blank=False, max_length=6)

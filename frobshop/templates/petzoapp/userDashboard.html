@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Dashboard</title>
+</head>
+<body>
+	{% if 'fail' in status %}
+		<h2>{{message}}</h2>
+	
+	{% else %}
+		<h2>User : {{user}}</h2>
+		{% for p in pets %}
+			<h3>{{p.name}}</h3><br>
+			<a href="/app/editPetInfo/{{user.id}}/{{p.pet}}/{{p.id}}/">Edit</a>
+		{% endfor %}
+	{% endif %}
+
+</body>
+</html>

@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Edit</title>
+</head>
+<body>
+	{% if 'fail' in status %}
+		<h2>{{message}}</h2>
+	
+	{% else %}
+		<form method="POST" action="/app/updatePet/{{uId}}/{{pet.pet}}/{{pet.id}}">
+			<input type="input" name="name" value="{{pet.name}}"><br>
+			<input type="input" name="breed" value="{{pet.breed}}"><br>
+			<input type="input" name="age" value="{{pet.age}}"><br>
+			<input type="input" name="gender" value="{{pet.gender}}"><br>
+			<input type="input" name="weight" value="{{pet.weight}}"><br>
+			<button type="submit">Save</button>
+		</form>
+	{% endif %}
+</body>
+</html>
