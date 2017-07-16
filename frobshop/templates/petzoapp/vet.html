@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Vet</title>
+</head>
+<body>
+{% if not user %}
+<form method="POST" action="/app/vet/login/">
+	{% csrf_token %}
+	Username : <input type="text" name="username"><br>
+	Password: <input type="password" name="password"><br>
+	<button type="submit">Login</button>
+</form>
+{% else %}
+	{% for r in referredUsers %}
+		<p>{{r}}
+	{% endfor %}
+	{% for o in orders %}
+		<p>{{o}}
+	{% endfor %}
+	<h2>Credt : {{credit}}</h2>
+	<br>
+	<a href="/app/vet/logout/">Logout</a>
+{% endif %}
+</body>
+</html>

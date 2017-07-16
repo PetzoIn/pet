@@ -4,7 +4,10 @@ from petzoapp.views import *
 
 urlpatterns = [
 	url(r'^$', index, name='Home'),
-	url(r'^dashboard/(?P<uId>\d+)/$', dashboard, name='dashboard'),
+	url(r'^vet/$', vet, name='Vet'),
+	url(r'^vet/login/$', vetLogin, name='Vet'),
+	url(r'^vet/logout/$', vetLogout, name='Vet'),
+	url(r'^dashboard/(?P<uId>\d+)/$', userDashboard, name='dashboard'),
 	url(r'^editPetInfo/(?P<uId>\d+)/(?P<pet>[\w]+)/(?P<petId>\d+)/$', editPetInfo, name='editPetInfo'),
 	url(r'^updatePet/(?P<uId>\d+)/(?P<pet>[\w]+)/(?P<petId>\d+)/$', updatePet, name='updatePet'),
 	url(r'^addVoucher/$', addVoucher, name='addVoucher'),
