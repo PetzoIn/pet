@@ -78,3 +78,17 @@ class Vet(models.Model):
 
 	def __unicode__(self):
 		return str(self.name)
+
+class FoodInvoice(models.Model):
+	number = models.CharField(blank=False, max_length=128, unique=True)
+	order_id = models.CharField(blank=False, max_length=128, unique=True)
+	
+	def __unicode__(self):
+		return str(self.number)
+
+class SupplementsInvoice(models.Model):
+	number = models.CharField(blank=False, max_length=128, unique=True)
+	order_id = models.CharField(blank=False, max_length=128, unique=True)
+
+	def __unicode__(self):
+		return str(self.number)

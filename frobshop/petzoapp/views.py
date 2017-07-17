@@ -402,8 +402,9 @@ def refereeCredit(request):
 			credit = json.loads(credit)
 			user = User.objects.get(id=credit["user_id"])
 			userProfile, created = UserProfile.objects.get_or_create(user=user)
-			userProfile.user_credit -= Decimal(credit["credit_used"])
-			userProfile.save()
+			if created == False:
+				userProfile.user_credit -= Decimal(credit["credit_used"])
+				userProfile.save()
 			data['status'] = 'success'
 			data = json.dumps(data)
 			return HttpResponse(data)
@@ -580,6 +581,16 @@ def vet(request):
 						credit += 0.10 * float(total)
 
 			data["credit"] = credit
+			try:
+				vet = Vet.objects.get(user=user)
+				vet.user_credit = credit
+				vet.no_of_referred_users = len(userProfiles)
+				vet.save()
+
+			except Exception as e:
+				data['status'] = 'success'
+				data['message'] = str(e)
+
 			return render(request, 'petzoapp/vet.html', data)
 
 	else:
@@ -620,6 +631,13 @@ def vetLogout(request):
 	if request.user.is_authenticated():
 		logout(request)
 		return redirect('/app/vet/')
+
+	else:
+		raise Http404('Unauthorised')
+
+def invoice(request):
+	if request.user.is_authenticated():
+		pass
 
 	else:
 		raise Http404('Unauthorised')
