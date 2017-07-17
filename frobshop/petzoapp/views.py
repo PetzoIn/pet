@@ -648,11 +648,17 @@ def invoice(request):
 				'supplementsInvoiceNumber' : '',
 			}
 			data['order_id'] = request.POST.get('order_id')
-			print data
+			product = []
+			quantity = []
+			prices = []
 			order = Order.objects.get(id=data['order_id'])
 			print order
 			for line in order.basket.all_lines():
 				print line
+				product = line.product
+				quantity = line.quantity
+				price = line.price_incl_tax
+				print product, quantity, price
 			data = json.dumps(data)
 			return HttpResponse(data)
 
