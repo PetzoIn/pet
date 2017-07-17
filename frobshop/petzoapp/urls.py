@@ -17,4 +17,5 @@ urlpatterns = [
 	url(r'^rzp/$', test, name='rzp'),
 	url(r'^getReferral/$', getReferral, name='getReferral'),
 	url(r'^refereeCredit/$', refereeCredit, name='refereeCredit'),
+	url(r'^invoice/$', invoice, name='invoice'),
 ]

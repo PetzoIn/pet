@@ -372,8 +372,10 @@ def getReferral(request):
 def refereeCredit(request):
 	if request.method == 'POST':
 		data = {
-			'status':''
+			'status':'',
+			'order_id' : '',
 		}
+		data['order_id'] = request.session['checkout_order_id']
 		if 'referral' in request.session:
 			referral = request.session["referral"]
 			referral = json.loads(referral)
@@ -636,8 +638,26 @@ def vetLogout(request):
 		raise Http404('Unauthorised')
 
 def invoice(request):
-	if request.user.is_authenticated():
-		pass
+	if request.method == 'POST':
+		if request.user.is_authenticated():
+			data = {
+				'status' : '',
+				'message' : '',
+				'order_id' : '',
+				'foodInvoiceNumber' : '',
+				'supplementsInvoiceNumber' : '',
+			}
+			data['order_id'] = request.POST.get('order_id')
+			print data
+			order = Order.objects.get(id=data['order_id'])
+			print order
+			for line in order.basket.all_lines():
+				print line
+			data = json.dumps(data)
+			return HttpResponse(data)
+
+		else:
+			raise Http404('Unauthorised')
 
 	else:
 		raise Http404('Unauthorised')
