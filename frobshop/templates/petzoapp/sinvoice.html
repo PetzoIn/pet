@@ -22,7 +22,7 @@
 			<td colspan="8">
 				Invoice No. : {{invoice_id}}<br>
 				Invoice date : {{invoice_date}}<br>
-				Reverse Charge : NO
+				Order Id : {{order_id}}
 			</td>
 		</tr>
 		<tr>
@@ -46,14 +46,14 @@
 		</tr>
 		<tr>
 			<td colspan="4" style="border-style:none">
-				Name : {{}}<br> 
-				Address : {{}}<br>
-				GSTIN/UIN : {{}}
+				Name : {{name}}<br> 
+				Address : {{address}}<br>
+				GSTIN/UIN : 
 			</td>
 			<td colspan="4" style="border-style:none">
-				Name : {{}}<br> 
-				Address : {{}}<br>
-				GSTIN/UIN : {{}}
+				Name : {{name}}<br> 
+				Address : {{address}}<br>
+				GSTIN/UIN : 
 			</td>
 		</tr>
 		<tr>
@@ -81,7 +81,7 @@
 		<td>Rate</td>
 		<td colspan="2">Total value of supply</td>
 	</tr>
-	{% for l in list %}
+	{% for l in suppList %}
 		<tr>
 			<td style="border-style:none">
 				{{forloop.counter}}.
@@ -90,7 +90,7 @@
 				{{l.product.title}}
 			</td>
 			<td style="border-style:none">
-				
+				----
 			</td>
 			<td style="border-style:none">
 				{{l.quantity}}
@@ -106,18 +106,21 @@
 	</table><br>
 	<table width="80%">
 	<tr>
-		<td colspan="4" style="border-style:none">Terms and Conditions <br>1. The goods sold as are intended for<br> end user consumption and not for re-sale 	</td>
-		<td colspan="4">Gross amount before tax <br> Discounts <br> Total amount after discount <br>Total tax amount</td>
+		<td colspan="4" style="border-style:none">
+			Terms and Conditions <br>
+			1. The goods sold as are intended for<br> 
+			end user consumption and not for re-sale 
+		</td>
+		<td colspan="4">
+			Gross amount : {{supp_total}}<br> 
+			Discount : <br> 
+			Total amount after discount : <br>
+		</td>
 	</tr>
 	<tr>
 		<td colspan="4" rowspan="5" style="border-style:none"></td>
 	</tr>
 	<tr>
-	</tr>
-	<tr>
-		<td colspan"3">
-			<b>Total amount after tax</b>
-		</td>
 	</tr>
 	<tr>
 		<td colspan="3"><center><b>For Petzo India Pvt. Ltd. <br> <br> <br></b></center> </td>

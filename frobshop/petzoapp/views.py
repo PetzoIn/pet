@@ -660,6 +660,7 @@ def invoice(request):
 				'food_sub_total' : 0,
 				'food_total' : 0,
 				'food_discount' : 0,
+				'bill_value' : 0,
 				'cgst':'',
 				'sgst':'',
 				'igst':'',
@@ -676,8 +677,9 @@ def invoice(request):
 				'supp_invoice_id' : '1234',
 				'suppList' : [],
 				'supp_sub_total' : 0,
-				'supp_discount' : 0,
 				'supp_total' : 0,
+				'supp_discount' : 0,
+				'bill_value' : 0,
 				'cgst':'',
 				'sgst':'',
 				'igst':'',
@@ -686,11 +688,12 @@ def invoice(request):
 			order_id = 100015
 			foodData['order_id'] = order_id
 			suppData['order_id'] = order_id
-			# if 'DISCOUNT' in request.session:
-			# 	 data['discount'] = request.session['DISCOUNT']
-			# 	 request.session['DISCOUNT'] = ''
-			# 	 request.session['CODE'] = ''
+			if 'DISCOUNT' in request.session:
+				 data['discount'] = request.session['DISCOUNT']
+				 request.session['DISCOUNT'] = ''
+				 request.session['CODE'] = ''
 
+			total = 0
 			sumFood = 0
 			sumSupp = 0
 			order = Order.objects.get(number=order_id)
@@ -710,20 +713,27 @@ def invoice(request):
 				price = line.line_price_incl_tax
 				print product, quantity, price
 				upc = product.upc
+				total += price
 				if 'FD' in upc:
-					data['foodList'].append({'product':product, 'price':price/1.12, 'quantity': quantity, 'total':price*quantity/1.12})
+					foodData['foodList'].append({'product':product, 'price':price/1.12, 'quantity': quantity, 'total':price*quantity/1.12})
 					sumFood += price/1.12
 					food = True
 
 				elif 'SU' in upc:
-					data['suppList'].append({'product':product, 'price':price, 'quantity': quantity, 'total':price*quantity})
+					suppData['suppList'].append({'product':product, 'price':price, 'quantity': quantity, 'total':price*quantity})
 					sumSupp += price
 					supp = True
 
-			data['food_sub_total'] = sumFood/(1.12)
-			data['supp_sub_total'] = sumSupp/(1.12)
-			data['food_discount'] = data['food_sub_total'] - sumFood
-			data['supp_discount'] = data['supp_sub_total'] - sumSupp
+			foodData['bill_value'] = total
+			suppData['bill_value'] = total
+			foodData['food_total'] = sumFood
+			suppData['supp_total'] = sumSupp
+			# foodData['food_sub_total'] = foodData['food_total']
+			foodData['food_sub_total'] = total/1.12
+			suppData['supp_sub_total'] = suppData['supp_total']
+			foodData['food_discount'] = foodData['food_sub_total'] - sumFood
+			suppData['supp_discount'] = suppData['supp_sub_total'] - sumSupp
+			
 			
 			# if 'delhi' in data['state'].lower():
 			# 	data['cgst'] = 

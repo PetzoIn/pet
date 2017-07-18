@@ -81,7 +81,7 @@
 		<td>Rate</td>
 		<td colspan="2">Total value of supply</td>
 	</tr>
-	{% for l in list %}
+	{% for l in foodList %}
 		<tr>
 			<td style="border-style:none">
 				{{forloop.counter}}.
@@ -90,7 +90,7 @@
 				{{l.product.title}}
 			</td>
 			<td style="border-style:none">
-				
+				----
 			</td>
 			<td style="border-style:none">
 				{{l.quantity}}
@@ -108,9 +108,9 @@
 	<tr>
 		<td colspan="5" rowspan="4">Terms and Conditions</td>
 		<td colspan="3">
-			Gross amount before tax : {{total}}<br>
-			Discount : {{discount}}<br>
-			Total amount after discount(taxable) : {{total_incl_discount}}<br>
+			Gross amount before tax : {{food_total}}<br>
+			Discount : {{food_discount}}<br>
+			Total amount after discount(taxable) : {{food_sub_total}}<br>
 		</td>
 	</tr>
 	<tr>
