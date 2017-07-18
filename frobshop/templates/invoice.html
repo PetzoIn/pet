@@ -1,0 +1,117 @@
+{% load static %}
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+	<title>Sales Invoice</title>
+	<style type="text/css">
+		table, th, td {
+		    border: 1px solid black;
+		}
+	</style>
+</head>
+<body>
+<center>
+	<table style="width:80%">
+		<tr>
+			<th colspan="1"><img src="{% static 'images/petzo.png' %}" width="110px" height="140px"/></th>
+			<th colspan="7">Petzo India Pvt. Ltd. <br>GSTIN: asdasdasdsadswasd<br>Contact:</th>
+		<tr>
+			<th colspan="8"><h2><b>Tax Invoice</b></h2></th>
+		</tr>
+		<tr>
+			<td colspan="8">
+				Invoice No. : {{invoice_id}}<br>
+				Invoice date : {{invoice_date}}<br>
+				Reverse Charge : NO
+			</td>
+		</tr>
+		<tr>
+			<td colspan="4" style="border-style:none">
+				State : {{state}}
+			</td>
+			<td colspan="4" style="border-style:none">
+				Code : {{state_code}}
+			</td>
+		</tr>
+		<tr>
+			<td colspan="8"><div></div></td>
+		</tr>
+		<tr>
+			<th colspan="4" style="border-style:none">
+				Bill to party
+			</th>
+			<th colspan="4" style="border-style:none">
+				Ship to party
+			</th>
+		</tr>
+		<tr>
+			<td colspan="4" style="border-style:none">
+				Name : {{}}<br> 
+				Address : {{}}<br>
+				GSTIN/UIN : {{}}
+			</td>
+			<td colspan="4" style="border-style:none">
+				Name : {{}}<br> 
+				Address : {{}}<br>
+				GSTIN/UIN : {{}}
+			</td>
+		</tr>
+		<tr>
+			<td colspan="2" style="border-style:none">
+				State
+			</td>
+			<td colspan="2" style="border-style:none">
+				Code
+			</td>
+			<td colspan="2" style="border-style:none">
+				State
+			</td>
+			<td colspan="2" style="border-style:none">
+				Code
+			</td>
+		</tr>
+	</table>
+	<br>
+	<table width="80%">
+	<tr>
+		<td>S.No.</td>
+		<td>Product/Service Description</td>
+		<td>HSN/Accounting Service Code</td>
+		<td>Qty./UQC</td>
+		<td>Rate</td>
+		<td colspan="2">Total value of supply</td>
+	</tr>
+	<tr>
+		<td style="border-style:none">1.</td>
+		<td style="border-style:none"></td>
+		<td style="border-style:none"></td>
+		<td style="border-style:none"></td>
+		<td style="border-style:none"></td>
+		<td colspan"2" style="border-style:none"></td>
+	</tr>
+	<tr>
+		<td style="border-style:none">2.</td>
+		<td style="border-style:none"></td>
+		<td style="border-style:none"></td>
+		<td style="border-style:none"></td>
+		<td style="border-style:none"></td>
+		<td colspan"2" style="border-style:none"></td>
+	</tr>
+	</table>
+	<table width="80%">
+	<tr>
+		<td colspan="5" rowspan="4">Terms and Conditions</td>
+		<td colspan="3">Gross amount before tax <br>Discount <br>Total amount after discount(taxable)<br></td>
+	</tr>
+	<tr>
+		<td colspan="3">Add CGST(6%)<br>Add SGST(6%)<br>Add IGST(12%)<br>Total tax amount</td>
+	<tr>
+		<td colspan"3"><b>Total amount after tax</b> <i>(आपने इतने पैसे दिए हैं):-</i></td>
+	</tr>
+	<tr>
+		<td colspan="3"><center><b>For Petzo India Pvt. Ltd. <br> <br> <br></b></center> </td>
+	</tr>
+</table>
+</center>
+</body>
+</html>

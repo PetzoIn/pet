@@ -237,3 +237,36 @@ ACCOUNT_USERNAME_REQURIED=True
 LOGIN_REDIRECT_URL = "/"
 
 OSCAR_MISSING_IMAGE_URL = MEDIA_ROOT + '/image_not_found.jpg'
+print 'BASE_DIR : ',BASE_DIR
+# LOGGING = {
+#     'version': 1,
+#     'disable_existing_loggers': True,
+#     'formatters': {
+#     'standard': {
+#         'format': "[%(asctime)s] %(levelname)s [%(name)s:%(lineno)s] %(message)s",
+#         'datefmt': "%d/%b/%Y %H:%M:%S"
+#         },
+#     },
+#     'handlers': {
+#         'logfile': {
+#             'level': 'DEBUG',
+#             'filename': BASE_DIR + "/Log/info.log"
+#         },
+#         'console': {
+#             'level': 'INFO',
+#             'class': 'logging.StreamHandler',
+#             'formatter': 'standard'
+#         },
+#     },
+#     'loggers': {
+#         'django': {
+#             'handlers': ['console'],
+#             'propagate': True,
+#             'level': 'WARN',
+#         },
+#         'xhtml2pdf': {
+#             'handlers': ['logfile'],
+#             'level': 'DEBUG'
+#        },
+#    }
+# }

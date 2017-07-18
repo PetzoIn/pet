@@ -24,6 +24,9 @@ from oscar.core.loading import get_model, get_class
 from oscar.core.utils import redirect_to_referrer
 from oscar.core import prices
 
+from django.template.loader import get_template
+from django.template import Context
+from frobshop.utils import render_to_pdf
 import razorpay
 
 from models import *
@@ -121,6 +124,7 @@ def addVoucher(request):
 
 			# Coupon
 			request.session['CODE'] = code
+			request.session['DISCOUNT'] = discount_to_be_applied
 			apply_voucher_to_basket(request, voucher)
 
 	elif request.method == 'GET':
@@ -169,6 +173,7 @@ def addVoucher(request):
 				}
 				credit = json.dumps(credit)
 				request.session['credit'] = credit
+				request.session['DISCOUNT'] = discount_to_be_applied
 				voucher = Voucher.objects.get(name='CREDIT')
 				print 'voucher : ', voucher
 				apply_voucher_to_basket(request, voucher)
@@ -638,29 +643,109 @@ def vetLogout(request):
 		raise Http404('Unauthorised')
 
 def invoice(request):
-	if request.method == 'POST':
+	# if request.method == 'POST':
+	if request.method == 'GET':
 		if request.user.is_authenticated():
-			data = {
+			foodData = {
 				'status' : '',
 				'message' : '',
-				'order_id' : '',
-				'foodInvoiceNumber' : '',
-				'supplementsInvoiceNumber' : '',
+				'order_id' : '15135',
+				'invoice_date' : datetime.datetime.today(),
+				'state' : 'New Delhi',
+				'state_code' : '14',
+				'name' : 'Rajat',
+				'address' : 'SIVICIV KUBS',
+				'food_invoice_id' : '1234',
+				'foodList' : [],
+				'food_sub_total' : 0,
+				'food_total' : 0,
+				'food_discount' : 0,
+				'cgst':'',
+				'sgst':'',
+				'igst':'',
 			}
-			data['order_id'] = request.POST.get('order_id')
-			product = []
-			quantity = []
-			prices = []
-			order = Order.objects.get(id=data['order_id'])
+			suppData = {
+				'status' : '',
+				'message' : '',
+				'order_id' : '15135',
+				'invoice_date' : datetime.datetime.today(),
+				'state' : 'New Delhi',
+				'state_code' : '14',
+				'name' : 'Rajat',
+				'address' : 'SIVICIV KUBS',
+				'supp_invoice_id' : '1234',
+				'suppList' : [],
+				'supp_sub_total' : 0,
+				'supp_discount' : 0,
+				'supp_total' : 0,
+				'cgst':'',
+				'sgst':'',
+				'igst':'',
+			}
+			# order_id = request.POST.get('order_id')
+			order_id = 100015
+			foodData['order_id'] = order_id
+			suppData['order_id'] = order_id
+			# if 'DISCOUNT' in request.session:
+			# 	 data['discount'] = request.session['DISCOUNT']
+			# 	 request.session['DISCOUNT'] = ''
+			# 	 request.session['CODE'] = ''
+
+			sumFood = 0
+			sumSupp = 0
+			order = Order.objects.get(number=order_id)
 			print order
-			for line in order.basket.all_lines():
+			foodData['name'] = order.shipping_address.name
+			foodData['address'] = order.shipping_address.line1 + ', ' + order.shipping_address.line2 + ', ' + order.shipping_address.line3 + ', ' + order.shipping_address.line4
+			foodData['state'] = order.shipping_address.state
+			suppData['name'] = foodData['name']
+			suppData['address'] = foodData['address']
+			suppData['state'] = foodData['state']
+			food = False
+			supp = False
+			for line in order.lines.all():
 				print line
 				product = line.product
 				quantity = line.quantity
-				price = line.price_incl_tax
+				price = line.line_price_incl_tax
 				print product, quantity, price
-			data = json.dumps(data)
-			return HttpResponse(data)
+				upc = product.upc
+				if 'FD' in upc:
+					data['foodList'].append({'product':product, 'price':price/1.12, 'quantity': quantity, 'total':price*quantity/1.12})
+					sumFood += price/1.12
+					food = True
+
+				elif 'SU' in upc:
+					data['suppList'].append({'product':product, 'price':price, 'quantity': quantity, 'total':price*quantity})
+					sumSupp += price
+					supp = True
+
+			data['food_sub_total'] = sumFood/(1.12)
+			data['supp_sub_total'] = sumSupp/(1.12)
+			data['food_discount'] = data['food_sub_total'] - sumFood
+			data['supp_discount'] = data['supp_sub_total'] - sumSupp
+			
+			# if 'delhi' in data['state'].lower():
+			# 	data['cgst'] = 
+			# 	data['sgst'] = 
+			# 	data['igst'] = '--'
+			
+			# else:
+			# 	data['cgst'] = '--'
+			# 	data['sgst'] = '--'
+			# 	data['igst'] = 
+
+			template = get_template('petzoapp/invoice.html')
+			html = template.render(data)
+			return HttpResponse(html)
+			pdf = render_to_pdf('petzoapp/invoice.html', data)
+			if pdf:
+				response = HttpResponse(pdf, content_type='application/pdf')
+				filename = "Invoice_%s.pdf"%('1215')
+				content = "inline; filename='%s'" %(filename)
+				# content = "attachment; filename='%s'" %(filename)
+				response['Content-Disposition'] = content
+				return response
 
 		else:
 			raise Http404('Unauthorised')
