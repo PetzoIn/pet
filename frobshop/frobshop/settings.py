@@ -179,8 +179,10 @@ OSCAR_SHOP_NAME = 'Petzo'
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'    
 
-MEDIA_ROOT = os.path.join(BASE_DIR,'media/images/products')
+MEDIA_ROOT = os.path.join(BASE_DIR,'media')
 MEDIA_URL = '/media/'
+THUMBNAIL_DEBUG = True
+THUMBNAIL_KEY_PREFIX = 'oscar'
 
 # EMAIL_HOST = 'smtp.zoho.com'
 # EMAIL_HOST_USER = 'hello@petzo.co'
