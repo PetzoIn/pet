@@ -182,11 +182,28 @@ EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 MEDIA_ROOT = os.path.join(BASE_DIR,'media/images/products')
 MEDIA_URL = '/media/'
 
+# EMAIL_HOST = 'smtp.zoho.com'
+# EMAIL_HOST_USER = 'hello@petzo.co'
+# EMAIL_HOST_PASSWORD = 'gopetzo@987'
 EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_HOST_USER = 'siddharth.game@gmail.com'
-EMAIL_HOST_PASSWORD = '1402J@ck8518'
+EMAIL_HOST_USER = 'tech.petzo@gmail.com'
+EMAIL_HOST_PASSWORD = 'petzo@tech'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
+EMAIL_USE_SSL = False
+
+ACCOUNT_AUTHENTICATION_METHOD = 'email'
+ACCOUNT_USERNAME_REQUIRED = False
+ACCOUNT_EMAIL_REQUIRED = True
+ACCOUNT_UNIQUE_EMAIL = True
+ACCOUNT_EMAIL_VERIFICATION = "mandatory"
+ACCOUNT_USER_MODEL_USERNAME_FIELD = "username"
+ACCOUNT_USER_MODEL_EMAIL_FIELD = 'email'
+
+
+
+# google_cliend_id = ' 921925979778-q3hi8uhq32jippmn38i5nvsqtb2tqmp5.apps.googleusercontent.com '
+# google_cliend_secret = ' lpFjb01YEZAkrLg0XRnJha8I '
 
 SOCIALACCOUNT_PROVIDERS = {                             
                     'facebook': {'METHOD': 'oauth2',
@@ -208,7 +225,8 @@ SOCIALACCOUNT_PROVIDERS = {
                              'LOCALE_FUNC': lambda request: 'kr_KR',
                              'VERIFIED_EMAIL': False,
                              'VERSION': 'v2.4'},
-                    'google': {'METHOD': 'oauth2',
+
+                    'google': {
                         'SCOPE': [
                             'profile',
                             'email'
@@ -232,41 +250,6 @@ SOCIAL_AUTH_FACEBOOK_KEY = '214453772411989'
 SOCIAL_AUTH_FACEBOOK_SECRET ='1804d9377b699cfb383929209d01a12b'
 
 ACCOUNT_EMAIL_REQUIRED=True
-ACCOUNT_USERNAME_REQURIED=True
-
 LOGIN_REDIRECT_URL = "/"
 
 OSCAR_MISSING_IMAGE_URL = MEDIA_ROOT + '/image_not_found.jpg'
-print 'BASE_DIR : ',BASE_DIR
-# LOGGING = {
-#     'version': 1,
-#     'disable_existing_loggers': True,
-#     'formatters': {
-#     'standard': {
-#         'format': "[%(asctime)s] %(levelname)s [%(name)s:%(lineno)s] %(message)s",
-#         'datefmt': "%d/%b/%Y %H:%M:%S"
-#         },
-#     },
-#     'handlers': {
-#         'logfile': {
-#             'level': 'DEBUG',
-#             'filename': BASE_DIR + "/Log/info.log"
-#         },
-#         'console': {
-#             'level': 'INFO',
-#             'class': 'logging.StreamHandler',
-#             'formatter': 'standard'
-#         },
-#     },
-#     'loggers': {
-#         'django': {
-#             'handlers': ['console'],
-#             'propagate': True,
-#             'level': 'WARN',
-#         },
-#         'xhtml2pdf': {
-#             'handlers': ['logfile'],
-#             'level': 'DEBUG'
-#        },
-#    }
-# }

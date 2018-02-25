@@ -331,7 +331,7 @@ def getReferral(request):
 			referral_code = ReferralCode.objects.get(user=request.user)
 			code = referral_code.code
 			data["referral_code"] = code
-			userProfile = UserProfile.objects.get(user=request.user)
+			userProfile, created = UserProfile.objects.get_or_create(user=request.user)
 			user_credit = userProfile.user_credit
 			data["user_credit"] = str(user_credit)
 			data = json.dumps(data)
